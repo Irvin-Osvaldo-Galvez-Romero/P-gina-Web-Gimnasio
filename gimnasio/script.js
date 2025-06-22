@@ -6,6 +6,10 @@ let ventas = [];
 let administradores = [];
 let carrito = [];
 
+// Variables para almacenar las instancias de las gráficas
+let ventasMensualesChart = null;
+let ventasMembresiaChart = null;
+
 // Cargar datos desde MongoDB al iniciar
 async function cargarDatosDesdeMongoDB() {
     try {
@@ -158,22 +162,81 @@ function saveToLocalStorage() {
 
 // Funciones de navegación
 function showScreen(screenName) {
-    // Ocultar todas las pantallas
+    // Obtener la pantalla actual activa
+    const currentScreen = document.querySelector('.screen.active');
+    const targetScreen = document.getElementById(`${screenName}Screen`);
+    
+    if (!targetScreen) {
+        console.error(`Pantalla ${screenName} no encontrada`);
+        return;
+    }
+    
+    // Si es la misma pantalla, no hacer nada
+    if (currentScreen === targetScreen) {
+        return;
+    }
+    
+    // Determinar la dirección de la transición
+    const screens = ['dashboard', 'clientes', 'ventas', 'productos', 'administradores', 'reportes'];
+    const currentIndex = screens.indexOf(currentScreen.id.replace('Screen', ''));
+    const targetIndex = screens.indexOf(screenName);
+    
+    // Remover clases de animación previas
     document.querySelectorAll('.screen').forEach(screen => {
-        screen.classList.remove('active');
+        screen.classList.remove('slide-right', 'slide-left', 'fade-up', 'scale-in');
     });
     
-    // Mostrar la pantalla seleccionada
-    document.getElementById(`${screenName}Screen`).classList.add('active');
+    // Aplicar animación de salida a la pantalla actual
+    if (currentScreen) {
+        currentScreen.style.transition = 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+        currentScreen.style.opacity = '0';
+        currentScreen.style.transform = 'translateY(-20px)';
+        
+        // Remover la clase active después de la animación de salida
+        setTimeout(() => {
+            currentScreen.classList.remove('active');
+            currentScreen.style.transition = '';
+            currentScreen.style.opacity = '';
+            currentScreen.style.transform = '';
+        }, 500);
+    }
     
-    // Actualizar botones de navegación
+    // Aplicar animación de entrada a la nueva pantalla
+    setTimeout(() => {
+        targetScreen.classList.add('active');
+        
+        // Determinar el tipo de animación basado en la dirección
+        if (targetIndex > currentIndex) {
+            targetScreen.classList.add('slide-right');
+        } else if (targetIndex < currentIndex) {
+            targetScreen.classList.add('slide-left');
+        } else {
+            targetScreen.classList.add('fade-up');
+        }
+        
+        // Remover la clase de animación después de completarse con transición suave
+        setTimeout(() => {
+            targetScreen.style.transition = 'all 0.3s ease-out';
+            targetScreen.classList.remove('slide-right', 'slide-left', 'fade-up');
+            setTimeout(() => {
+                targetScreen.style.transition = '';
+            }, 300);
+        }, 650);
+    }, 500);
+    
+    // Actualizar botones de navegación con animación
     document.querySelectorAll('.nav-btn').forEach(btn => {
         btn.classList.remove('active');
+        btn.style.transform = 'scale(1)';
     });
     
     const activeBtn = document.querySelector(`[onclick="showScreen('${screenName}')"]`);
     if (activeBtn) {
         activeBtn.classList.add('active');
+        activeBtn.style.transform = 'scale(1.05)';
+        setTimeout(() => {
+            activeBtn.style.transform = '';
+        }, 300);
     }
     
     // Cargar datos específicos de la pantalla
@@ -196,6 +259,31 @@ function showScreen(screenName) {
         case 'reportes':
             loadReportes();
             break;
+    }
+}
+
+// Función para actualizar la UI basada en el rol del usuario
+function actualizarUIporRol() {
+    if (!currentUser) return;
+
+    const esAdmin = currentUser.rol === 'admin';
+    const esSupervisor = currentUser.rol === 'supervisor';
+
+    // El empleado es el rol con menos privilegios
+    const esEmpleado = currentUser.rol === 'empleado';
+
+    // Mostrar u ocultar el botón de navegación de Administradores
+    const adminNavButton = document.querySelector('[onclick="showScreen(\'administradores\')]');
+    if (adminNavButton) {
+        // Solo admin y supervisor pueden ver la sección de Administradores
+        adminNavButton.style.display = esAdmin || esSupervisor ? 'flex' : 'none';
+    }
+
+    // Ocultar el botón "Nuevo Administrador" para empleados
+    const nuevoAdminButton = document.querySelector('#administradoresScreen .btn-primary');
+    if (nuevoAdminButton) {
+        // Solo admin y supervisor pueden agregar nuevos administradores
+        nuevoAdminButton.style.display = esAdmin || esSupervisor ? 'flex' : 'none';
     }
 }
 
@@ -230,6 +318,9 @@ async function login() {
             // Ocultar formulario de login
             document.getElementById('loginForm').style.display = 'none';
             
+            // <<--- APLICAR RESTRICCIONES DE UI --- >>
+            actualizarUIporRol();
+
             // Mostrar dashboard
             mostrarDashboard();
             
@@ -621,7 +712,7 @@ function renderProductosGrid() {
             card.className = 'producto-card';
             card.onclick = () => agregarAlCarrito(producto);
             card.innerHTML = `
-                <img src="${producto.imagen || 'default-product.jpg'}" alt="${producto.nombre}" class="producto-imagen">
+                <img src="${producto.imagen || 'Imagenes/Logo.png'}" alt="${producto.nombre}" class="producto-imagen">
                 <div class="producto-nombre">${producto.nombre}</div>
                 <div class="producto-precio">$${(producto.precio || 0).toFixed(2)}</div>
                 <div class="producto-stock">Stock: ${stock}</div>
@@ -774,13 +865,10 @@ function renderProductosTable() {
         const stock = producto.stock || producto.piezas || 0;
         const stockClass = stock > 10 ? 'success' : stock > 0 ? 'warning' : 'danger';
         
-        row.innerHTML = `
-            <td>${productoId}</td>
-            <td><img src="${producto.imagen || 'Imagenes/Logo.png'}" alt="${producto.nombre}" class="producto-imagen-tabla"></td>
-            <td>${producto.nombre}</td>
-            <td>$${(producto.precio || 0).toFixed(2)}</td>
-            <td>${stock}</td>
-            <td>
+        let actionButtons = '';
+        // Solo mostrar botones de acción si el usuario NO es un empleado
+        if (currentUser && currentUser.rol !== 'empleado') {
+            actionButtons = `
                 <div class="action-buttons">
                     <button class="btn-edit" onclick="editProducto('${productoId}')" title="Editar">
                         <i class="fas fa-edit"></i>
@@ -789,6 +877,17 @@ function renderProductosTable() {
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
+            `;
+        }
+
+        row.innerHTML = `
+            <td>${productoId}</td>
+            <td><img src="${producto.imagen || 'Imagenes/Logo.png'}" alt="${producto.nombre}" class="producto-imagen-tabla"></td>
+            <td>${producto.nombre}</td>
+            <td>$${(producto.precio || 0).toFixed(2)}</td>
+            <td>${stock}</td>
+            <td>
+                ${actionButtons}
             </td>
         `;
         tbody.appendChild(row);
@@ -856,55 +955,50 @@ document.getElementById('productForm').addEventListener('submit', async function
     e.preventDefault();
     
     const productoId = document.getElementById('productoId').value;
-    const producto = {
-        nombre: document.getElementById('productoNombre').value,
-        precio: parseFloat(document.getElementById('productoPrecio').value),
-        stock: parseInt(document.getElementById('productoPiezas').value),
-        imagen: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjMDA3YmZmIi8+Cjx0ZXh0IHg9IjEwMCIgeT0iMTAwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTYiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+UHJvZHVjdG88L3RleHQ+Cjwvc3ZnPgo='
-    };
+    const imagenInput = document.getElementById('productoImagen');
     
-    console.log('📦 Enviando datos del producto:', producto);
+    const formData = new FormData();
+    formData.append('nombre', document.getElementById('productoNombre').value);
+    formData.append('precio', parseFloat(document.getElementById('productoPrecio').value));
+    formData.append('stock', parseInt(document.getElementById('productoPiezas').value));
+    
+    // Adjuntar la imagen solo si se seleccionó una
+    if (imagenInput.files.length > 0) {
+        formData.append('imagen', imagenInput.files[0]);
+    }
+    
+    console.log('📦 Enviando datos del producto con FormData...');
     
     try {
         let response;
-        if (productoId && !productoId.startsWith('TEMP_')) {
-            // Actualizar producto existente
-            console.log('🔄 Actualizando producto con ID:', productoId);
-            response = await fetch(`/api/productos/${productoId}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(producto)
-            });
-    } else {
-            // Crear nuevo producto
-            console.log('➕ Creando nuevo producto');
-            response = await fetch('/api/productos', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(producto)
-            });
-        }
+        const isUpdate = productoId && !productoId.startsWith('TEMP_');
+        
+        const url = isUpdate ? `/api/productos/${productoId}` : '/api/productos';
+        const method = isUpdate ? 'PUT' : 'POST';
+        
+        console.log(`📡 Realizando petición: ${method} a ${url}`);
+        
+        response = await fetch(url, {
+            method: method,
+            body: formData // No se necesita 'Content-Type', el navegador lo establece automáticamente para FormData
+        });
         
         console.log('📡 Respuesta del servidor:', response.status);
         
         if (response.ok) {
-            if (productoId) {
-                mostrarMensaje('Producto actualizado correctamente', 'success');
-            } else {
-                const nuevoProducto = await response.json();
-                console.log('✅ Nuevo producto creado:', nuevoProducto);
-                productos.push(nuevoProducto);
-                mostrarMensaje('Producto agregado correctamente', 'success');
+            const successMessage = isUpdate ? 'Producto actualizado correctamente' : 'Producto agregado correctamente';
+            mostrarMensaje(successMessage, 'success');
+            
+            // Recargar datos desde el servidor para reflejar los cambios
+            await cargarDatosDesdeMongoDB();
+            
+            // Actualizar vistas
+            renderProductosTable();
+            if (document.getElementById('ventasScreen').classList.contains('active')) {
+                renderProductosGrid();
             }
             
-            // Recargar datos desde el servidor
-            await cargarDatosDesdeMongoDB();
-    renderProductosTable();
-    closeProductModal();
+            closeProductModal();
         } else {
             const errorData = await response.json();
             console.error('❌ Error del servidor:', errorData);
@@ -968,12 +1062,17 @@ function renderAdministradoresTable() {
         const adminId = admin.id || admin._id;
         const rolClass = admin.rol === 'admin' ? 'danger' : admin.rol === 'empleado' ? 'warning' : 'info';
         
-        row.innerHTML = `
-            <td>${adminId}</td>
-            <td>${admin.nombre}</td>
-            <td>${admin.email}</td>
-            <td><span class="badge badge-${rolClass}">${admin.rol}</span></td>
-            <td>
+        let actionButtons = '';
+        const canEdit = (
+            // Un admin puede editar a todos
+            currentUser.rol === 'admin' || 
+            // Un supervisor puede editar a supervisores y empleados, pero no a admins
+            (currentUser.rol === 'supervisor' && admin.rol !== 'admin')
+        );
+
+        // Solo mostrar botones de acción si el usuario tiene permiso
+        if (currentUser && canEdit) {
+            actionButtons = `
                 <div class="action-buttons">
                     <button class="btn-edit" onclick="editAdmin('${adminId}')" title="Editar">
                         <i class="fas fa-edit"></i>
@@ -982,6 +1081,16 @@ function renderAdministradoresTable() {
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
+            `;
+        }
+        
+        row.innerHTML = `
+            <td>${adminId}</td>
+            <td>${admin.nombre}</td>
+            <td>${admin.email}</td>
+            <td><span class="badge badge-${rolClass}">${admin.rol}</span></td>
+            <td>
+                ${actionButtons}
             </td>
         `;
         tbody.appendChild(row);
@@ -1168,19 +1277,19 @@ async function loadReportesStats() {
     }
 }
 
-// Variables para las gráficas de reportes
-let ventasMensualesChart = null;
-let ventasMembresiaChart = null;
-
 // Función para cargar gráfica de ventas mensuales
 async function loadVentasMensualesChart() {
+    const canvasContainer = document.querySelector('#ventasChart').parentElement;
+    canvasContainer.innerHTML = '<p style="color: #000; font-weight: bold;">Cargando datos...</p>';
+
     try {
         const response = await fetch('/api/reportes/ventas-mensuales');
-        if (!response.ok) {
-            throw new Error('La respuesta de la red no fue correcta');
-        }
+        if (!response.ok) throw new Error('No se pudieron obtener los datos de ventas.');
+        
         const chartData = await response.json();
-
+        
+        // Limpiar contenedor y recrear el canvas
+        canvasContainer.innerHTML = '<canvas id="ventasChart"></canvas>';
         const ctx = document.getElementById('ventasChart').getContext('2d');
 
         if (ventasMensualesChart) {
@@ -1188,142 +1297,151 @@ async function loadVentasMensualesChart() {
         }
         
         ventasMensualesChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
+            type: 'bar',
+            data: {
                 labels: chartData.labels,
-            datasets: [{
-                label: 'Ventas Mensuales',
+                datasets: [{
+                    label: 'Ventas Mensuales',
                     data: chartData.data,
-                    backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
                     borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
+                    borderWidth: 2,
+                    borderRadius: 5,
+                }]
+            },
+            options: {
+                responsive: true,
                 maintainAspectRatio: false,
-            scales: {
-                y: {
-                        beginAtZero: true,
-                        max: 10000, // Límite máximo fijo
-                        min: 0,
-                        ticks: {
-                            callback: function(value) {
-                                return '$' + value.toLocaleString('es-MX');
-                            },
-                            stepSize: 1000 // Divisiones de 1000 en 1000
-                        }
-                    }
+                scales: {
+                    y: { beginAtZero: true, ticks: { color: '#000000', font: { weight: 'bold' } } },
+                    x: { ticks: { color: '#000000', font: { weight: 'bold' } } }
                 },
                 plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top',
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                let label = context.dataset.label || '';
-                                if (label) {
-                                    label += ': ';
-                                }
-                                if (context.parsed.y !== null) {
-                                    label += new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(context.parsed.y);
-                                }
-                                return label;
-                            }
-                        }
+                    legend: { labels: { color: '#000000', font: { size: 14, weight: 'bold' } } }
                 }
             }
-        }
-    });
+        });
+
     } catch (error) {
         console.error('Error al cargar la gráfica de ventas mensuales:', error);
-        const chartContainer = document.querySelector('.chart-wrapper:first-child');
-        if (chartContainer) {
-            chartContainer.innerHTML = '<p style="text-align: center; color: #ff0000;">No se pudo cargar la gráfica de ventas mensuales.</p>';
-        }
+        canvasContainer.innerHTML = `<p style="color: #d9534f; font-weight: bold;">${error.message}</p>`;
     }
 }
 
 // Función para cargar gráfica de ventas por membresía
 async function loadVentasMembresiaChart() {
+    const canvasContainer = document.querySelector('#membresiasChart').parentElement;
+    canvasContainer.innerHTML = '<p style="color: #000; font-weight: bold;">Cargando datos...</p>';
+
     try {
         const response = await fetch('/api/reportes/ventas-membresia');
-        if (!response.ok) {
-            throw new Error('La respuesta de la red no fue correcta');
-        }
+        if (!response.ok) throw new Error('No se pudieron obtener los datos de membresías.');
+
         const chartData = await response.json();
 
+        // Limpiar contenedor y recrear el canvas
+        canvasContainer.innerHTML = '<canvas id="membresiasChart"></canvas>';
         const ctx = document.getElementById('membresiasChart').getContext('2d');
 
         if (ventasMembresiaChart) {
             ventasMembresiaChart.destroy();
         }
         
+        if (chartData.labels.length === 0) {
+            canvasContainer.innerHTML = '<p style="color: #000; font-weight: bold;">No hay datos de membresías para mostrar.</p>';
+            return;
+        }
+        
         ventasMembresiaChart = new Chart(ctx, {
             type: 'doughnut',
-        data: {
+            data: {
                 labels: chartData.labels,
-            datasets: [{
+                datasets: [{
                     label: 'Clientes por Membresía',
                     data: chartData.data,
-                backgroundColor: [
-                        'rgba(255, 99, 132, 0.8)',
-                        'rgba(54, 162, 235, 0.8)',
-                        'rgba(255, 205, 86, 0.8)',
-                        'rgba(75, 192, 192, 0.8)',
-                        'rgba(153, 102, 255, 0.8)',
-                        'rgba(255, 159, 64, 0.8)'
-                ],
-                borderColor: [
-                        'rgba(255, 99, 132, 1)',
-                        'rgba(54, 162, 235, 1)',
-                        'rgba(255, 205, 86, 1)',
-                        'rgba(75, 192, 192, 1)',
-                        'rgba(153, 102, 255, 1)',
-                        'rgba(255, 159, 64, 1)'
-                ],
-                borderWidth: 2
-            }]
-        },
-        options: {
-            responsive: true,
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.7)', 'rgba(54, 162, 235, 0.7)',
+                        'rgba(255, 205, 86, 0.7)', 'rgba(75, 192, 192, 0.7)',
+                    ],
+                    borderColor: '#fff',
+                    borderWidth: 3,
+                }]
+            },
+            options: {
+                responsive: true,
                 maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                        display: true,
+                plugins: {
+                    legend: {
                         position: 'right',
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                const label = context.label || '';
-                                const value = context.parsed;
-                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                const percentage = ((value / total) * 100).toFixed(1);
-                                return `${label}: ${value} (${percentage}%)`;
-                            }
-                        }
+                        labels: { color: '#000000', font: { size: 14, weight: 'bold' } }
+                    }
                 }
             }
-        }
-    });
+        });
+
     } catch (error) {
         console.error('Error al cargar la gráfica de ventas por membresía:', error);
-        const chartContainer = document.querySelector('.chart-wrapper:last-child');
-        if (chartContainer) {
-            chartContainer.innerHTML = '<p style="text-align: center; color: #ff0000;">No se pudo cargar la gráfica de ventas por membresía.</p>';
-        }
+        canvasContainer.innerHTML = `<p style="color: #d9534f; font-weight: bold;">${error.message}</p>`;
     }
 }
 
 // Logout
 function logout() {
-    currentUser = null;
-    carrito = [];
-    showAlert('Sesión cerrada correctamente');
-    showScreen('login');
+    // Obtener la pantalla actual
+    const currentScreen = document.querySelector('.screen.active');
+    const loginScreen = document.getElementById('loginScreen');
+    
+    if (currentScreen && loginScreen) {
+        // Animación de salida de la pantalla actual
+        currentScreen.style.transition = 'all 0.7s cubic-bezier(0.4, 0, 0.2, 1)';
+        currentScreen.style.opacity = '0';
+        currentScreen.style.transform = 'scale(0.9) translateY(50px)';
+        
+        // Después de la animación de salida, mostrar login
+        setTimeout(() => {
+            currentScreen.classList.remove('active');
+            currentScreen.style.transition = '';
+            currentScreen.style.opacity = '';
+            currentScreen.style.transform = '';
+            
+            // Limpiar datos de sesión
+            currentUser = null;
+            carrito = [];
+            
+            // Mostrar login con animación
+            loginScreen.classList.add('active');
+            loginScreen.style.transition = 'all 0.7s cubic-bezier(0.4, 0, 0.2, 1)';
+            loginScreen.style.opacity = '0';
+            loginScreen.style.transform = 'scale(0.9)';
+            
+            // Animar entrada del login
+            setTimeout(() => {
+                loginScreen.style.opacity = '1';
+                loginScreen.style.transform = 'scale(1)';
+                
+                // Limpiar estilos después de la animación
+                setTimeout(() => {
+                    loginScreen.style.transition = '';
+                    loginScreen.style.opacity = '';
+                    loginScreen.style.transform = '';
+                }, 700);
+            }, 50);
+            
+            // Mostrar mensaje de logout
+            showAlert('Sesión cerrada correctamente');
+            
+            // Limpiar formulario de login
+            document.getElementById('loginForm').reset();
+            document.getElementById('loginForm').style.display = 'block';
+            
+        }, 700);
+    } else {
+        // Fallback si no se encuentran las pantallas
+        currentUser = null;
+        carrito = [];
+        showAlert('Sesión cerrada correctamente');
+        showScreen('login');
+    }
 }
 
 // Cerrar modales al hacer clic fuera de ellos
@@ -1379,6 +1497,42 @@ function mostrarMensaje(mensaje, tipo) {
 
 // Función para mostrar dashboard
 function mostrarDashboard() {
-    showScreen('dashboard');
-    loadDashboard();
+    // Obtener la pantalla de login
+    const loginScreen = document.getElementById('loginScreen');
+    const dashboardScreen = document.getElementById('dashboardScreen');
+    
+    if (loginScreen && dashboardScreen) {
+        // Animación de salida del login
+        loginScreen.style.transition = 'all 0.7s cubic-bezier(0.4, 0, 0.2, 1)';
+        loginScreen.style.opacity = '0';
+        loginScreen.style.transform = 'scale(0.9) translateY(-50px)';
+        
+        // Después de la animación de salida, mostrar dashboard
+        setTimeout(() => {
+            loginScreen.classList.remove('active');
+            loginScreen.style.transition = '';
+            loginScreen.style.opacity = '';
+            loginScreen.style.transform = '';
+            
+            // Mostrar dashboard con animación
+            dashboardScreen.classList.add('active');
+            dashboardScreen.classList.add('scale-in');
+            
+            // Remover la clase de animación después de completarse con transición suave
+            setTimeout(() => {
+                dashboardScreen.style.transition = 'all 0.3s ease-out';
+                dashboardScreen.classList.remove('scale-in');
+                setTimeout(() => {
+                    dashboardScreen.style.transition = '';
+                }, 300);
+            }, 700);
+            
+            // Cargar datos del dashboard
+            loadDashboard();
+        }, 700);
+    } else {
+        // Fallback si no se encuentran las pantallas
+        showScreen('dashboard');
+        loadDashboard();
+    }
 } 

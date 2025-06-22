@@ -4,8 +4,13 @@ const path = require('path');
 const {
     connectToMongoDB,
     getCollection,
-    closeConnection
+    closeConnection,
+    getDb,
+    crearProducto,
+    actualizarProductoPorId
 } = require('./mongodb-config');
+const { ObjectId } = require('mongodb');
+const multer = require('multer');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -17,6 +22,23 @@ let mongoClient = null;
 app.use(cors());
 app.use(express.json());
 app.use(express.static('.'));
+
+// Servir archivos estáticos desde la carpeta 'public' y 'Imagenes'
+app.use(express.static(path.join(__dirname, 'public')));
+app.use('/Imagenes', express.static(path.join(__dirname, 'Imagenes')));
+
+// Configuración de Multer para almacenamiento de imágenes
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'Imagenes/')
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    }
+});
+
+const upload = multer({ storage: storage });
 
 // Función para obtener conexión a MongoDB
 async function getMongoConnection() {
@@ -405,74 +427,54 @@ app.get('/api/productos', async (req, res) => {
     }
 });
 
-app.post('/api/productos', async (req, res) => {
+app.post('/api/productos', upload.single('imagen'), async (req, res) => {
     try {
-        console.log('📦 Creando nuevo producto...');
+        const { nombre, precio, stock } = req.body;
         
-        const client = await getMongoConnection();
-        const db = client.db();
-        const productosCollection = db.collection('productos');
-        
-        // Generar ID personalizado
-        const idPersonalizado = await generarIdPersonalizado('productos', 'P');
-        console.log('🆔 ID generado:', idPersonalizado);
-        
-        const nuevoProducto = {
-            id: idPersonalizado,
-            ...req.body,
-            createdAt: new Date(),
-            updatedAt: new Date()
+        const datosProducto = {
+            nombre,
+            precio: parseFloat(precio),
+            stock: parseInt(stock),
+            // Si hay un archivo, guarda su ruta, si no, usa el logo por defecto
+            imagen: req.file ? `Imagenes/${req.file.filename}` : 'Imagenes/Logo.png'
         };
-        
-        console.log('📋 Datos del producto:', nuevoProducto);
-        
-        const result = await productosCollection.insertOne(nuevoProducto);
-        console.log('✅ Producto creado con éxito');
-        
-        res.json({ _id: result.insertedId, ...nuevoProducto });
+
+        const nuevoProducto = await crearProducto(datosProducto);
+        res.status(201).json(nuevoProducto);
+
     } catch (error) {
-        console.error('❌ Error creando producto:', error);
-        res.status(500).json({ error: 'Error interno del servidor: ' + error.message });
+        console.error('Error al crear producto:', error);
+        res.status(500).json({ error: 'Error interno del servidor al crear producto' });
     }
 });
 
-// Actualizar producto
-app.put('/api/productos/:id', async (req, res) => {
+app.put('/api/productos/:id', upload.single('imagen'), async (req, res) => {
     try {
-        const client = await getMongoConnection();
-        const db = client.db();
-        const productosCollection = db.collection('productos');
-        
         const { id } = req.params;
-        const updateData = {
-            ...req.body,
-            updatedAt: new Date()
+        const { nombre, precio, stock } = req.body;
+
+        const datosActualizados = {
+            nombre,
+            precio: parseFloat(precio),
+            stock: parseInt(stock)
         };
         
-        // Buscar por id personalizado o _id de MongoDB
-        let result;
-        try {
-            const { ObjectId } = require('mongodb');
-            result = await productosCollection.updateOne(
-                { _id: new ObjectId(id) },
-                { $set: updateData }
-            );
-        } catch (error) {
-            // Si falla la conversión, buscar por id personalizado
-            result = await productosCollection.updateOne(
-                { id: id },
-                { $set: updateData }
-            );
+        // Si se sube una nueva imagen, añadirla a los datos a actualizar
+        if (req.file) {
+            datosActualizados.imagen = `Imagenes/${req.file.filename}`;
+        }
+
+        const productoActualizado = await actualizarProductoPorId(id, datosActualizados);
+
+        if (!productoActualizado) {
+            return res.status(404).json({ error: 'Producto no encontrado' });
         }
         
-        if (result.modifiedCount > 0) {
-            res.json({ message: 'Producto actualizado correctamente' });
-        } else {
-            res.status(404).json({ error: 'Producto no encontrado' });
-        }
+        res.json(productoActualizado);
+
     } catch (error) {
-        console.error('Error actualizando producto:', error);
-        res.status(500).json({ error: 'Error interno del servidor' });
+        console.error('Error al actualizar producto:', error);
+        res.status(500).json({ error: 'Error interno del servidor al actualizar producto' });
     }
 });
 
