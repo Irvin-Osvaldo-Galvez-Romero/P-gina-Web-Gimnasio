@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gimnasio - Sistema de Gestión</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="screen active">
+        <div class="login-container">
+            <div class="login-box">
+                <div class="logo-container">
+                    <img src="Imagenes/Logo.png" alt="Logo Gimnasio" class="logo">
+                </div>
+                <h2>Iniciar Sesión</h2>
+                <form id="loginForm">
+                    <div class="input-group">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="username" placeholder="Nombre de Usuario" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="password" placeholder="Contraseña" required>
+                    </div>
+                    <button type="submit" class="login-btn">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Iniciar Sesión
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Screen -->
+    <div id="dashboardScreen" class="screen">
+        <nav class="navbar">
+            <div class="nav-brand">
+                <img src="Imagenes/Logo.png" alt="Logo" class="nav-logo">
+                <span>Gimnasio</span>
+            </div>
+            <div class="nav-menu">
+                <button class="nav-btn active" onclick="showScreen('dashboard')">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </button>
+                <button class="nav-btn" onclick="showScreen('clientes')">
+                    <i class="fas fa-users"></i> Clientes
+                </button>
+                <button class="nav-btn" onclick="showScreen('ventas')">
+                    <i class="fas fa-shopping-cart"></i> Ventas
+                </button>
+                <button class="nav-btn" onclick="showScreen('productos')">
+                    <i class="fas fa-box"></i> Productos
+                </button>
+                <button class="nav-btn" onclick="showScreen('administradores')">
+                    <i class="fas fa-user-shield"></i> Administradores
+                </button>
+                <button class="nav-btn" onclick="showScreen('reportes')">
+                    <i class="fas fa-chart-bar"></i> Reportes
+                </button>
+                <button class="nav-btn logout-btn" onclick="showScreen('salir')">
+                    <i class="fas fa-sign-out-alt"></i> Salir
+                </button>
+            </div>
+        </nav>
+
+        <div class="dashboard-content">
+            <h1>Dashboard</h1>
+            
+            <div class="stats-cards">
+                <div class="stat-card" onclick="selectStat('clientes')">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="totalClientes">0</h3>
+                        <p>Total Clientes</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card" onclick="selectStat('ventas')">
+                    <div class="stat-icon">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="ventasDia">$0</h3>
+                        <p>Ventas del Día</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card" onclick="selectStat('productos')">
+                    <div class="stat-icon">
+                        <i class="fas fa-box"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="productosStock">0</h3>
+                        <p>Productos en Stock</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="dashboardChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Clientes Screen -->
+    <div id="clientesScreen" class="screen">
+        <nav class="navbar">
+            <div class="nav-brand">
+                <img src="Imagenes/Logo.png" alt="Logo" class="nav-logo">
+                <span>Gimnasio</span>
+            </div>
+            <div class="nav-menu">
+                <button class="nav-btn" onclick="showScreen('dashboard')">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </button>
+                <button class="nav-btn active" onclick="showScreen('clientes')">
+                    <i class="fas fa-users"></i> Clientes
+                </button>
+                <button class="nav-btn" onclick="showScreen('ventas')">
+                    <i class="fas fa-shopping-cart"></i> Ventas
+                </button>
+                <button class="nav-btn" onclick="showScreen('productos')">
+                    <i class="fas fa-box"></i> Productos
+                </button>
+                <button class="nav-btn" onclick="showScreen('administradores')">
+                    <i class="fas fa-user-shield"></i> Administradores
+                </button>
+                <button class="nav-btn" onclick="showScreen('reportes')">
+                    <i class="fas fa-chart-bar"></i> Reportes
+                </button>
+                <button class="nav-btn logout-btn" onclick="showScreen('salir')">
+                    <i class="fas fa-sign-out-alt"></i> Salir
+                </button>
+            </div>
+        </nav>
+
+        <div class="content">
+            <div class="content-header">
+                <h1>Gestión de Clientes</h1>
+                <button class="btn-primary" onclick="showClientForm()">
+                    <i class="fas fa-plus"></i> Nuevo Cliente
+                </button>
+            </div>
+
+            <div class="search-container">
+                <input type="text" id="searchCliente" placeholder="Buscar cliente..." class="search-input">
+                <i class="fas fa-search search-icon"></i>
+            </div>
+
+            <div class="table-container">
+                <table id="clientesTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Apellidos</th>
+                            <th>Edad</th>
+                            <th>Enfermedad Crónica</th>
+                            <th>Alergia</th>
+                            <th>Tipo de Membresía</th>
+                            <th>Dirección</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="clientesTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Modal para agregar/editar cliente -->
+        <div id="clientModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeClientModal()">&times;</span>
+                <h2 id="clientModalTitle">Nuevo Cliente</h2>
+                <form id="clientForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="clienteId">ID:</label>
+                            <input type="text" id="clienteId" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="clienteNombre">Nombre:</label>
+                            <input type="text" id="clienteNombre" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="clienteApellidos">Apellidos:</label>
+                            <input type="text" id="clienteApellidos" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="clienteEdad">Edad:</label>
+                            <input type="number" id="clienteEdad" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="clienteEnfermedad">Enfermedad Crónica:</label>
+                            <input type="text" id="clienteEnfermedad">
+                        </div>
+                        <div class="form-group">
+                            <label for="clienteAlergia">Alergia:</label>
+                            <input type="text" id="clienteAlergia">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="clienteMembresia">Tipo de Membresía:</label>
+                            <select id="clienteMembresia" required>
+                                <option value="">Seleccionar...</option>
+                                <option value="Mensual">Mensual</option>
+                                <option value="Trimestral">Trimestral</option>
+                                <option value="Semestral">Semestral</option>
+                                <option value="Anual">Anual</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="clienteDireccion">Dirección:</label>
+                            <input type="text" id="clienteDireccion" required>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" onclick="closeClientModal()">Cancelar</button>
+                        <button type="submit" class="btn-primary">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ventas Screen -->
+    <div id="ventasScreen" class="screen">
+        <nav class="navbar">
+            <div class="nav-brand">
+                <img src="Imagenes/Logo.png" alt="Logo" class="nav-logo">
+                <span>Gimnasio</span>
+            </div>
+            <div class="nav-menu">
+                <button class="nav-btn" onclick="showScreen('dashboard')">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </button>
+                <button class="nav-btn" onclick="showScreen('clientes')">
+                    <i class="fas fa-users"></i> Clientes
+                </button>
+                <button class="nav-btn active" onclick="showScreen('ventas')">
+                    <i class="fas fa-shopping-cart"></i> Ventas
+                </button>
+                <button class="nav-btn" onclick="showScreen('productos')">
+                    <i class="fas fa-box"></i> Productos
+                </button>
+                <button class="nav-btn" onclick="showScreen('administradores')">
+                    <i class="fas fa-user-shield"></i> Administradores
+                </button>
+                <button class="nav-btn" onclick="showScreen('reportes')">
+                    <i class="fas fa-chart-bar"></i> Reportes
+                </button>
+                <button class="nav-btn logout-btn" onclick="showScreen('salir')">
+                    <i class="fas fa-sign-out-alt"></i> Salir
+                </button>
+            </div>
+        </nav>
+
+        <div class="ventas-container">
+            <div class="productos-section">
+                <h2>Productos Disponibles</h2>
+                <div class="productos-grid" id="productosGrid">
+                    <!-- Los productos se cargarán dinámicamente -->
+                </div>
+            </div>
+
+            <div class="carrito-section">
+                <h2>Carrito de Compras</h2>
+                <div class="carrito-items" id="carritoItems">
+                    <!-- Los items del carrito se mostrarán aquí -->
+                </div>
+                
+                <div class="carrito-total">
+                    <h3>Total: <span id="carritoTotal">$0.00</span></h3>
+                    <button class="btn-primary" onclick="procesarVenta()">
+                        <i class="fas fa-credit-card"></i> Procesar Venta
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Productos Screen -->
+    <div id="productosScreen" class="screen">
+        <nav class="navbar">
+            <div class="nav-brand">
+                <img src="Imagenes/Logo.png" alt="Logo" class="nav-logo">
+                <span>Gimnasio</span>
+            </div>
+            <div class="nav-menu">
+                <button class="nav-btn" onclick="showScreen('dashboard')">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </button>
+                <button class="nav-btn" onclick="showScreen('clientes')">
+                    <i class="fas fa-users"></i> Clientes
+                </button>
+                <button class="nav-btn" onclick="showScreen('ventas')">
+                    <i class="fas fa-shopping-cart"></i> Ventas
+                </button>
+                <button class="nav-btn active" onclick="showScreen('productos')">
+                    <i class="fas fa-box"></i> Productos
+                </button>
+                <button class="nav-btn" onclick="showScreen('administradores')">
+                    <i class="fas fa-user-shield"></i> Administradores
+                </button>
+                <button class="nav-btn" onclick="showScreen('reportes')">
+                    <i class="fas fa-chart-bar"></i> Reportes
+                </button>
+                <button class="nav-btn logout-btn" onclick="showScreen('salir')">
+                    <i class="fas fa-sign-out-alt"></i> Salir
+                </button>
+            </div>
+        </nav>
+
+        <div class="content">
+            <div class="content-header">
+                <h1>Gestión de Productos</h1>
+                <button class="btn-primary" onclick="showProductForm()">
+                    <i class="fas fa-plus"></i> Nuevo Producto
+                </button>
+            </div>
+
+            <div class="search-container">
+                <input type="text" id="searchProducto" placeholder="Buscar producto..." class="search-input">
+                <i class="fas fa-search search-icon"></i>
+            </div>
+
+            <div class="table-container">
+                <table id="productosTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Imagen</th>
+                            <th>Nombre del Producto</th>
+                            <th>Precio</th>
+                            <th>Piezas</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productosTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Modal para agregar/editar producto -->
+        <div id="productModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeProductModal()">&times;</span>
+                <h2 id="productModalTitle">Nuevo Producto</h2>
+                <form id="productForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="productoId">ID:</label>
+                            <input type="text" id="productoId" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="productoNombre">Nombre del Producto:</label>
+                            <input type="text" id="productoNombre" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="productoPrecio">Precio:</label>
+                            <input type="number" id="productoPrecio" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="productoPiezas">Piezas:</label>
+                            <input type="number" id="productoPiezas" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="productoImagen">Imagen del Producto:</label>
+                        <input type="file" id="productoImagen" accept="image/*">
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" onclick="closeProductModal()">Cancelar</button>
+                        <button type="submit" class="btn-primary">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Administradores Screen -->
+    <div id="administradoresScreen" class="screen">
+        <nav class="navbar">
+            <div class="nav-brand">
+                <img src="Imagenes/Logo.png" alt="Logo" class="nav-logo">
+                <span>Gimnasio</span>
+            </div>
+            <div class="nav-menu">
+                <button class="nav-btn" onclick="showScreen('dashboard')">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </button>
+                <button class="nav-btn" onclick="showScreen('clientes')">
+                    <i class="fas fa-users"></i> Clientes
+                </button>
+                <button class="nav-btn" onclick="showScreen('ventas')">
+                    <i class="fas fa-shopping-cart"></i> Ventas
+                </button>
+                <button class="nav-btn" onclick="showScreen('productos')">
+                    <i class="fas fa-box"></i> Productos
+                </button>
+                <button class="nav-btn active" onclick="showScreen('administradores')">
+                    <i class="fas fa-user-shield"></i> Administradores
+                </button>
+                <button class="nav-btn" onclick="showScreen('reportes')">
+                    <i class="fas fa-chart-bar"></i> Reportes
+                </button>
+                <button class="nav-btn logout-btn" onclick="showScreen('salir')">
+                    <i class="fas fa-sign-out-alt"></i> Salir
+                </button>
+            </div>
+        </nav>
+
+        <div class="content">
+            <div class="content-header">
+                <h1>Gestión de Administradores</h1>
+                <button class="btn-primary" onclick="showAdminForm()">
+                    <i class="fas fa-plus"></i> Nuevo Administrador
+                </button>
+            </div>
+
+            <div class="search-container">
+                <input type="text" id="searchAdmin" placeholder="Buscar administrador..." class="search-input">
+                <i class="fas fa-search search-icon"></i>
+            </div>
+
+            <div class="table-container">
+                <table id="adminsTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Email</th>
+                            <th>Rol</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminsTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Modal para agregar/editar administrador -->
+        <div id="adminModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeAdminModal()">&times;</span>
+                <h2 id="adminModalTitle">Nuevo Administrador</h2>
+                <form id="adminForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="adminId">ID:</label>
+                            <input type="text" id="adminId" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="adminNombre">Nombre:</label>
+                            <input type="text" id="adminNombre" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="adminEmail">Email:</label>
+                            <input type="email" id="adminEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="adminPassword">Contraseña:</label>
+                            <input type="password" id="adminPassword" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="adminRol">Rol:</label>
+                        <select id="adminRol" required>
+                            <option value="admin">Administrador</option>
+                            <option value="empleado">Empleado</option>
+                            <option value="supervisor">Supervisor</option>
+                        </select>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" onclick="closeAdminModal()">Cancelar</button>
+                        <button type="submit" class="btn-primary">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reportes Screen -->
+    <div id="reportesScreen" class="screen">
+        <nav class="navbar">
+            <div class="nav-brand">
+                <img src="Imagenes/Logo.png" alt="Logo" class="nav-logo">
+                <span>Gimnasio</span>
+            </div>
+            <div class="nav-menu">
+                <button class="nav-btn" onclick="showScreen('dashboard')">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </button>
+                <button class="nav-btn" onclick="showScreen('clientes')">
+                    <i class="fas fa-users"></i> Clientes
+                </button>
+                <button class="nav-btn" onclick="showScreen('ventas')">
+                    <i class="fas fa-shopping-cart"></i> Ventas
+                </button>
+                <button class="nav-btn" onclick="showScreen('productos')">
+                    <i class="fas fa-box"></i> Productos
+                </button>
+                <button class="nav-btn" onclick="showScreen('administradores')">
+                    <i class="fas fa-user-shield"></i> Administradores
+                </button>
+                <button class="nav-btn active" onclick="showScreen('reportes')">
+                    <i class="fas fa-chart-bar"></i> Reportes
+                </button>
+                <button class="nav-btn logout-btn" onclick="showScreen('salir')">
+                    <i class="fas fa-sign-out-alt"></i> Salir
+                </button>
+            </div>
+        </nav>
+
+        <div class="reportes-content">
+            <h1>Reportes</h1>
+            
+            <div class="reportes-cards">
+                <div class="reporte-card">
+                    <div class="reporte-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="reporte-info">
+                        <h3 id="ventasMensuales">$0</h3>
+                        <p>Ventas Mensuales</p>
+                    </div>
+                </div>
+                
+                <div class="reporte-card">
+                    <div class="reporte-icon">
+                        <i class="fas fa-id-card"></i>
+                    </div>
+                    <div class="reporte-info">
+                        <h3 id="membresiasActivas">0</h3>
+                        <p>Membresías Activas</p>
+                    </div>
+                </div>
+                
+                <div class="reporte-card">
+                    <div class="reporte-icon">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                    <div class="reporte-info">
+                        <h3 id="ingresosMensuales">$0</h3>
+                        <p>Ingresos Mensuales</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="charts-container">
+                <div class="chart-wrapper">
+                    <h3>Ventas Mensuales</h3>
+                    <canvas id="ventasChart"></canvas>
+                </div>
+                
+                <div class="chart-wrapper">
+                    <h3>Ventas por Membresía</h3>
+                    <canvas id="membresiasChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Salir Screen -->
+    <div id="salirScreen" class="screen">
+        <div class="logout-container">
+            <div class="logout-box">
+                <div class="logout-icon">
+                    <i class="fas fa-question-circle"></i>
+                </div>
+                <h2>¿Desea Cerrar la Sesión?</h2>
+                <div class="logout-actions">
+                    <button class="btn-secondary" onclick="showScreen('dashboard')">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button class="btn-danger" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+        import { getAuth } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
+        import { getStorage } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-storage.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-analytics.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCEF4RquVQUqJQV22tsb6CQ-XPpOT-6sPs",
+            authDomain: "gimnasio-app-d43ff.firebaseapp.com",
+            projectId: "gimnasio-app-d43ff",
+            storageBucket: "gimnasio-app-d43ff.firebasestorage.app",
+            messagingSenderId: "92472310007",
+            appId: "1:92472310007:web:1863a112391adf60da3bf2",
+            measurementId: "G-CE4SECBZ7H"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+        const analytics = getAnalytics(app);
+
+        // Hacer disponibles globalmente
+        window.auth = auth;
+        window.db = db;
+        window.storage = storage;
+        window.analytics = analytics;
+
+        console.log('Firebase inicializado correctamente');
+    </script>
+
+    <script src="script.js"></script>
+</body>
+</html> 

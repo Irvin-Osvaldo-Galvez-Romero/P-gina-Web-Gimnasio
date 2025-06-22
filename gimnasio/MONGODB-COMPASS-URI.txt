@@ -1,0 +1,10 @@
+URI de conexión para MongoDB Compass:
+
+mongodb+srv://Usuario:X5ZhVvf1eRkUMQeE@cluster0.hnpybvy.mongodb.net/gimnasio_db?retryWrites=true&w=majority&appName=Cluster0
+
+Instrucciones:
+1. Abre MongoDB Compass
+2. Haz clic en "New Connection"
+3. Pega la URI arriba en el campo de conexión
+4. Haz clic en "Connect"
+5. Selecciona la base de datos "gimnasio_db" 
