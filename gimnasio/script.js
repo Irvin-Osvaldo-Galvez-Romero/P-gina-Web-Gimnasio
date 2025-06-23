@@ -10,6 +10,53 @@ let carrito = [];
 let ventasMensualesChart = null;
 let ventasMembresiaChart = null;
 
+// Colores Neon para las gráficas
+const neonPurple = '#9f2fff';
+const neonCyan = '#00f2ff';
+const neonLime = '#dfff00';
+const textColor = '#f0f0f0';
+const gridColor = 'rgba(159, 47, 255, 0.2)';
+
+// --- Traducciones básicas ---
+const translations = {
+    es: {
+        dashboard: 'Dashboard',
+        clientes: 'Clientes',
+        ventas: 'Ventas',
+        productos: 'Productos',
+        administradores: 'Administradores',
+        reportes: 'Reportes',
+        configuracion: 'Configuración',
+        salir: 'Salir',
+        bienvenida: nombre => `¡Bienvenido ${nombre}!`,
+        notificaciones: 'Notificaciones',
+        fuente: 'Fuente',
+        idioma: 'Idioma',
+        animaciones: 'Animaciones de Interfaz',
+        restaurar: 'Restaurar Ajustes',
+        restablecer: 'Restablecer',
+        // ... puedes agregar más textos aquí ...
+    },
+    en: {
+        dashboard: 'Dashboard',
+        clientes: 'Clients',
+        ventas: 'Sales',
+        productos: 'Products',
+        administradores: 'Admins',
+        reportes: 'Reports',
+        configuracion: 'Settings',
+        salir: 'Logout',
+        bienvenida: name => `Welcome ${name}!`,
+        notificaciones: 'Notifications',
+        fuente: 'Font',
+        idioma: 'Language',
+        animaciones: 'UI Animations',
+        restaurar: 'Restore Settings',
+        restablecer: 'Reset',
+        // ... puedes agregar más textos aquí ...
+    }
+};
+
 // Cargar datos desde MongoDB al iniciar
 async function cargarDatosDesdeMongoDB() {
     try {
@@ -124,30 +171,44 @@ function cargarDatosEjemplo() {
 }
 
 // Cargar datos al iniciar la página
-document.addEventListener('DOMContentLoaded', function() {
-    cargarDatosDesdeMongoDB();
-    
-    // Event listener para el formulario de login
+document.addEventListener('DOMContentLoaded', async function() {
+    // 1. Configurar listeners y gráficas primero
+    setupConfigurationListeners();
+    initDashboardChart();
+    initReportesCharts();
+
+    // 2. Cargar configuraciones de usuario, lo que actualizará la UI y las gráficas
+    loadSettings();
+
+    // 3. Configurar el listener del formulario de login
     document.getElementById('loginForm').addEventListener('submit', function(e) {
         e.preventDefault();
         login();
     });
-    
-    // Verificar si ya hay un usuario logueado
+
+    // 4. Verificar si hay un usuario logueado en la sesión
     const savedUser = sessionStorage.getItem('currentUser');
     if (savedUser) {
         currentUser = JSON.parse(savedUser);
-        mostrarDashboard();
+        
+        // 5. Si hay usuario, cargar todos los datos y mostrar el dashboard
+        await cargarDatosDesdeMongoDB();
+        actualizarUIporRol();
+        showScreen('dashboard');
+    } else {
+        // 6. Si no hay usuario, mostrar la pantalla de login
+        showScreen('login');
     }
 });
 
 // Funciones de utilidad
 function showAlert(message, type = 'success') {
+    const settings = JSON.parse(localStorage.getItem('userSettings') || '{}');
+    if (settings.notificationsEnabled === false) return;
     const alert = document.createElement('div');
     alert.className = `alert alert-${type}`;
     alert.textContent = message;
     document.body.appendChild(alert);
-    
     setTimeout(() => {
         alert.remove();
     }, 3000);
@@ -162,64 +223,72 @@ function saveToLocalStorage() {
 
 // Funciones de navegación
 function showScreen(screenName) {
-    // Obtener la pantalla actual activa
-    const currentScreen = document.querySelector('.screen.active');
-    const targetScreen = document.getElementById(`${screenName}Screen`);
+    const allScreens = document.querySelectorAll('.screen');
+    allScreens.forEach(s => {
+        s.classList.remove('active', 'slide-right', 'slide-left', 'fade-up', 'scale-in');
+    });
+
+    // Manejar casos especiales
+    if (screenName === 'salir') {
+        document.getElementById('salirScreen').classList.add('active', 'fade-up');
+        return;
+    }
+    if (screenName === 'login') {
+        document.getElementById('loginScreen').classList.add('active');
+        return;
+    }
+
+    // Cargar datos y mostrar la pantalla correcta
+    switch(screenName) {
+        case 'dashboard':
+            loadDashboardData();
+            break;
+        case 'clientes':
+            loadClientes();
+            break;
+        case 'productos':
+            loadProductos();
+            break;
+        case 'administradores':
+            loadAdministradores();
+            break;
+        case 'ventas':
+            loadVentas();
+            break;
+        case 'reportes':
+            loadReportesData();
+            break;
+        case 'configuracion':
+            // No se necesita una función de carga especial,
+            // los listeners se encargan de todo.
+            break;
+    }
+
+    const screenId = screenName + 'Screen';
+    const screenElement = document.getElementById(screenId);
     
-    if (!targetScreen) {
+    if (!screenElement) {
         console.error(`Pantalla ${screenName} no encontrada`);
         return;
     }
     
-    // Si es la misma pantalla, no hacer nada
-    if (currentScreen === targetScreen) {
-        return;
-    }
-    
-    // Determinar la dirección de la transición
-    const screens = ['dashboard', 'clientes', 'ventas', 'productos', 'administradores', 'reportes'];
-    const currentIndex = screens.indexOf(currentScreen.id.replace('Screen', ''));
-    const targetIndex = screens.indexOf(screenName);
-    
-    // Remover clases de animación previas
-    document.querySelectorAll('.screen').forEach(screen => {
-        screen.classList.remove('slide-right', 'slide-left', 'fade-up', 'scale-in');
-    });
-    
-    // Aplicar animación de salida a la pantalla actual
-    if (currentScreen) {
-        currentScreen.style.transition = 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
-        currentScreen.style.opacity = '0';
-        currentScreen.style.transform = 'translateY(-20px)';
-        
-        // Remover la clase active después de la animación de salida
-        setTimeout(() => {
-            currentScreen.classList.remove('active');
-            currentScreen.style.transition = '';
-            currentScreen.style.opacity = '';
-            currentScreen.style.transform = '';
-        }, 500);
-    }
-    
     // Aplicar animación de entrada a la nueva pantalla
     setTimeout(() => {
-        targetScreen.classList.add('active');
+        screenElement.classList.add('active');
         
         // Determinar el tipo de animación basado en la dirección
-        if (targetIndex > currentIndex) {
-            targetScreen.classList.add('slide-right');
-        } else if (targetIndex < currentIndex) {
-            targetScreen.classList.add('slide-left');
+        if (screenName === 'dashboard') {
+            screenElement.classList.add('scale-in');
         } else {
-            targetScreen.classList.add('fade-up');
+            screenElement.classList.add('fade-up');
         }
         
         // Remover la clase de animación después de completarse con transición suave
         setTimeout(() => {
-            targetScreen.style.transition = 'all 0.3s ease-out';
-            targetScreen.classList.remove('slide-right', 'slide-left', 'fade-up');
+            screenElement.style.transition = 'all 0.3s ease-out';
+            screenElement.classList.remove('slide-right', 'slide-left', 'fade-up');
             setTimeout(() => {
-                targetScreen.style.transition = '';
+                screenElement.style.transition = '';
             }, 300);
         }, 650);
     }, 500);
@@ -237,28 +306,6 @@ function showScreen(screenName) {
         setTimeout(() => {
             activeBtn.style.transform = '';
         }, 300);
-    }
-    
-    // Cargar datos específicos de la pantalla
-    switch(screenName) {
-        case 'dashboard':
-            loadDashboard();
-            break;
-        case 'clientes':
-            loadClientes();
-            break;
-        case 'ventas':
-            loadVentas();
-            break;
-        case 'productos':
-            loadProductos();
-            break;
-        case 'administradores':
-            loadAdministradores();
-            break;
-        case 'reportes':
-            loadReportes();
-            break;
     }
 }
 
@@ -313,35 +360,31 @@ async function login() {
             // Guardar usuario en sessionStorage
             sessionStorage.setItem('currentUser', JSON.stringify(userData));
             
-            mostrarMensaje(`¡Bienvenido ${userData.nombre}!`, 'success');
+            showAlert(`¡Bienvenido ${userData.nombre}!`, 'success');
             
-            // Ocultar formulario de login
-            document.getElementById('loginForm').style.display = 'none';
-            
+            // Cargar todos los datos de la aplicación
+            await cargarDatosDesdeMongoDB();
+
             // <<--- APLICAR RESTRICCIONES DE UI --- >>
             actualizarUIporRol();
 
             // Mostrar dashboard
-            mostrarDashboard();
-            
-            // Cargar datos después del login
-            await cargarDatosDesdeMongoDB();
+            showScreen('dashboard');
             
         } else {
             const errorData = await response.json();
-            mostrarMensaje(errorData.error || 'Error en el login', 'error');
+            showAlert(errorData.error || 'Error en el login', 'error');
         }
         
     } catch (error) {
         console.error('Error en login:', error);
-        mostrarMensaje('Error de conexión. Verifica que el servidor esté corriendo.', 'error');
+        showAlert('Error de conexión. Verifica que el servidor esté corriendo.', 'error');
     }
 }
 
 // Dashboard
 function loadDashboard() {
-    updateDashboardStats();
-    loadDashboardChart();
+    loadDashboardData();
 }
 
 async function updateDashboardStats() {
@@ -399,11 +442,15 @@ async function loadDashboardChart() {
         datasets: [{
                     label: 'Ingresos (Últimos 7 Días)',
                     data: chartData.data,
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(0, 242, 255, 0.2)',
+                    borderColor: neonCyan,
                     borderWidth: 2,
-                    fill: true,
-                    tension: 0.4
+                    pointBackgroundColor: neonCyan,
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: neonCyan,
+                    tension: 0.4,
+                    fill: true
                 }]
             },
         options: {
@@ -413,10 +460,25 @@ async function loadDashboardChart() {
                 y: {
                         beginAtZero: true,
                         ticks: {
-                            callback: function(value) {
-                                return '$' + value.toLocaleString('es-MX');
+                            color: textColor,
+                            font: {
+                                size: 14
                             }
+                        },
+                        grid: {
+                            color: gridColor
                         }
+                },
+                x: {
+                    ticks: {
+                        color: textColor,
+                        font: {
+                            size: 14
+                        }
+                    },
+                    grid: {
+                        color: gridColor
+                    }
                 }
             },
             plugins: {
@@ -712,7 +774,7 @@ function renderProductosGrid() {
             card.className = 'producto-card';
             card.onclick = () => agregarAlCarrito(producto);
             card.innerHTML = `
-                <img src="${producto.imagen || 'Imagenes/Logo.png'}" alt="${producto.nombre}" class="producto-imagen">
+                <img src="${producto.imagen || 'Imagenes/Logo2.png'}" alt="${producto.nombre}" class="producto-imagen">
                 <div class="producto-nombre">${producto.nombre}</div>
                 <div class="producto-precio">$${(producto.precio || 0).toFixed(2)}</div>
                 <div class="producto-stock">Stock: ${stock}</div>
@@ -882,7 +944,7 @@ function renderProductosTable() {
 
         row.innerHTML = `
             <td>${productoId}</td>
-            <td><img src="${producto.imagen || 'Imagenes/Logo.png'}" alt="${producto.nombre}" class="producto-imagen-tabla"></td>
+            <td><img src="${producto.imagen || 'Imagenes/Logo2.png'}" alt="${producto.nombre}" class="producto-imagen-tabla"></td>
             <td>${producto.nombre}</td>
             <td>$${(producto.precio || 0).toFixed(2)}</td>
             <td>${stock}</td>
@@ -1029,7 +1091,7 @@ document.getElementById('searchProducto').addEventListener('input', function(e) 
         
         row.innerHTML = `
             <td>${productoId}</td>
-            <td><img src="${producto.imagen || 'Imagenes/Logo.png'}" alt="${producto.nombre}" class="producto-imagen-tabla"></td>
+            <td><img src="${producto.imagen || 'Imagenes/Logo2.png'}" alt="${producto.nombre}" class="producto-imagen-tabla"></td>
             <td>${producto.nombre}</td>
             <td>$${(producto.precio || 0).toFixed(2)}</td>
             <td>${stock}</td>
@@ -1257,133 +1319,78 @@ document.getElementById('searchAdmin').addEventListener('input', function(e) {
 });
 
 // Reportes
-function loadReportes() {
-    loadReportesStats();
-    loadVentasMensualesChart();
-    loadVentasMembresiaChart();
-}
-
-// Función para cargar estadísticas de reportes
-async function loadReportesStats() {
+async function loadReportesData() {
     try {
-        const response = await fetch('/api/dashboard/stats');
-        const stats = await response.json();
-        
-        document.getElementById('ventasMensuales').textContent = '$' + stats.ventasDia.toLocaleString('es-MX');
-        document.getElementById('membresiasActivas').textContent = stats.totalClientes;
-        document.getElementById('ingresosMensuales').textContent = '$' + stats.ventasDia.toLocaleString('es-MX');
-    } catch (error) {
-        console.error('Error al cargar estadísticas de reportes:', error);
-    }
-}
-
-// Función para cargar gráfica de ventas mensuales
-async function loadVentasMensualesChart() {
-    const canvasContainer = document.querySelector('#ventasChart').parentElement;
-    canvasContainer.innerHTML = '<p style="color: #000; font-weight: bold;">Cargando datos...</p>';
-
-    try {
-        const response = await fetch('/api/reportes/ventas-mensuales');
-        if (!response.ok) throw new Error('No se pudieron obtener los datos de ventas.');
-        
-        const chartData = await response.json();
-        
-        // Limpiar contenedor y recrear el canvas
-        canvasContainer.innerHTML = '<canvas id="ventasChart"></canvas>';
-        const ctx = document.getElementById('ventasChart').getContext('2d');
-
-        if (ventasMensualesChart) {
-            ventasMensualesChart.destroy();
+        const response = await fetch('/api/reportes/all');
+        if (!response.ok) {
+            throw new Error(`Error al cargar los datos de reportes: ${response.statusText}`);
         }
-        
-        ventasMensualesChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: chartData.labels,
-                datasets: [{
-                    label: 'Ventas Mensuales',
-                    data: chartData.data,
-                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 2,
-                    borderRadius: 5,
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: { beginAtZero: true, ticks: { color: '#000000', font: { weight: 'bold' } } },
-                    x: { ticks: { color: '#000000', font: { weight: 'bold' } } }
-                },
-                plugins: {
-                    legend: { labels: { color: '#000000', font: { size: 14, weight: 'bold' } } }
-                }
-            }
+        const data = await response.json();
+
+        // 1. Poblar las tarjetas de estadísticas
+        const { cardStats } = data;
+        document.getElementById('ventasMensuales').textContent = cardStats.ventasMensuales; // CORREGIDO: Usar el recuento de ventas
+        document.getElementById('membresiasActivas').textContent = cardStats.membresiasActivas;
+        document.getElementById('ingresosMensuales').textContent = `$${cardStats.ingresosMensuales.toFixed(2)}`;
+
+        // Debug: Mostrar información de membresías en consola
+        console.log('📊 Datos de reportes cargados:', {
+            ventasMensuales: cardStats.ventasMensuales,
+            membresiasActivas: cardStats.membresiasActivas,
+            ingresosMensuales: cardStats.ingresosMensuales
         });
 
+        // 2. Poblar la gráfica de Ventas Mensuales (Barras)
+        const { monthlyChartData } = data;
+        if (ventasChart) {
+            ventasChart.data.labels = monthlyChartData.labels;
+            ventasChart.data.datasets[0].data = monthlyChartData.data;
+            ventasChart.update();
+        }
+
+        // 3. Poblar la gráfica de Ventas por Membresía (Pastel)
+        const { membershipChartData } = data;
+        if (membresiasChart) {
+            membresiasChart.data.labels = membershipChartData.labels;
+            membresiasChart.data.datasets[0].data = membershipChartData.data;
+            membresiasChart.update();
+        }
+
     } catch (error) {
-        console.error('Error al cargar la gráfica de ventas mensuales:', error);
-        canvasContainer.innerHTML = `<p style="color: #d9534f; font-weight: bold;">${error.message}</p>`;
+        console.error('Error cargando datos de reportes:', error);
+        // Mostrar error en las tarjetas
+        document.getElementById('ventasMensuales').textContent = 'Error';
+        document.getElementById('membresiasActivas').textContent = 'Error';
+        document.getElementById('ingresosMensuales').textContent = 'Error';
     }
 }
 
-// Función para cargar gráfica de ventas por membresía
-async function loadVentasMembresiaChart() {
-    const canvasContainer = document.querySelector('#membresiasChart').parentElement;
-    canvasContainer.innerHTML = '<p style="color: #000; font-weight: bold;">Cargando datos...</p>';
-
+// Función de debug para verificar membresías activas
+async function debugMembresias() {
     try {
-        const response = await fetch('/api/reportes/ventas-membresia');
-        if (!response.ok) throw new Error('No se pudieron obtener los datos de membresías.');
-
-        const chartData = await response.json();
-
-        // Limpiar contenedor y recrear el canvas
-        canvasContainer.innerHTML = '<canvas id="membresiasChart"></canvas>';
-        const ctx = document.getElementById('membresiasChart').getContext('2d');
-
-        if (ventasMembresiaChart) {
-            ventasMembresiaChart.destroy();
+        const response = await fetch('/api/debug/membresias');
+        if (!response.ok) {
+            throw new Error('Error al obtener datos de debug');
         }
+        const data = await response.json();
         
-        if (chartData.labels.length === 0) {
-            canvasContainer.innerHTML = '<p style="color: #000; font-weight: bold;">No hay datos de membresías para mostrar.</p>';
-            return;
-        }
-        
-        ventasMembresiaChart = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: chartData.labels,
-                datasets: [{
-                    label: 'Clientes por Membresía',
-                    data: chartData.data,
-                    backgroundColor: [
-                        'rgba(255, 99, 132, 0.7)', 'rgba(54, 162, 235, 0.7)',
-                        'rgba(255, 205, 86, 0.7)', 'rgba(75, 192, 192, 0.7)',
-                    ],
-                    borderColor: '#fff',
-                    borderWidth: 3,
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'right',
-                        labels: { color: '#000000', font: { size: 14, weight: 'bold' } }
-                    }
-                }
-            }
+        console.log('🔍 Debug de Membresías:', data);
+        console.log('📋 Detalles de membresías activas:');
+        data.detalles.forEach(cliente => {
+            console.log(`   - ${cliente.nombre} (${cliente.tipoMembresia}): Expira ${new Date(cliente.fechaFin).toLocaleDateString()}`);
         });
-
+        
+        // Mostrar alerta con información
+        showAlert(`Membresías Activas: ${data.membresiasActivas} de ${data.totalClientes} total`, 'info');
+        
     } catch (error) {
-        console.error('Error al cargar la gráfica de ventas por membresía:', error);
-        canvasContainer.innerHTML = `<p style="color: #d9534f; font-weight: bold;">${error.message}</p>`;
+        console.error('Error en debug de membresías:', error);
+        showAlert('Error al verificar membresías', 'error');
     }
 }
+
+// Agregar función de debug al objeto window para poder llamarla desde la consola
+window.debugMembresias = debugMembresias;
 
 // Logout
 function logout() {
@@ -1461,78 +1468,506 @@ window.onclick = function(event) {
     }
 }
 
-// Inicialización
-document.addEventListener('DOMContentLoaded', function() {
-    // Verificar si hay una sesión activa
-    if (currentUser) {
-        showScreen('dashboard');
-    } else {
-        showScreen('login');
-    }
-    
-    // Verificar membresías cada 5 minutos
-    setInterval(checkMembresias, 5 * 60 * 1000);
-});
+// --- Lógica de Configuración ---
 
-// Función para mostrar mensajes
-function mostrarMensaje(mensaje, tipo) {
-    // Crear elemento de alerta
-    const alertDiv = document.createElement('div');
-    alertDiv.className = `alert alert-${tipo === 'error' ? 'danger' : tipo} alert-dismissible fade show`;
-    alertDiv.innerHTML = `
-        ${mensaje}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
+function updateChartFontSizes(multiplier = null) {
+    if (multiplier === null) {
+        const savedSettings = JSON.parse(localStorage.getItem('userSettings') || '{}');
+        multiplier = savedSettings.fontSize || 1;
+    }
+
+    // Base sizes in pixels
+    const baseTickSize = 14;
+    const baseLegendSize = 16;
+    const baseReportLegendSize = 14;
+
+    const newTickSize = baseTickSize * multiplier;
+    const newLegendSize = baseLegendSize * multiplier;
+    const newReportLegendSize = baseReportLegendSize * multiplier;
+
+    const charts = [dashboardChart, ventasChart, membresiasChart];
     
-    // Insertar al inicio del body
-    document.body.insertBefore(alertDiv, document.body.firstChild);
-    
-    // Auto-remover después de 5 segundos
-    setTimeout(() => {
-        if (alertDiv.parentNode) {
-            alertDiv.remove();
+    charts.forEach(chart => {
+        if (chart) {
+            if (chart.options.scales && chart.options.scales.x && chart.options.scales.y) {
+                chart.options.scales.x.ticks.font.size = newTickSize;
+                chart.options.scales.y.ticks.font.size = newTickSize;
+            }
+            if (chart.options.plugins && chart.options.plugins.legend) {
+                 if (chart === dashboardChart) {
+                    chart.options.plugins.legend.labels.font.size = newLegendSize;
+                } else {
+                    chart.options.plugins.legend.labels.font.size = newReportLegendSize;
+                }
+            }
+            chart.update('none'); // 'none' para evitar la animación de redibujado
         }
-    }, 5000);
+    });
 }
 
-// Función para mostrar dashboard
-function mostrarDashboard() {
-    // Obtener la pantalla de login
-    const loginScreen = document.getElementById('loginScreen');
-    const dashboardScreen = document.getElementById('dashboardScreen');
-    
-    if (loginScreen && dashboardScreen) {
-        // Animación de salida del login
-        loginScreen.style.transition = 'all 0.7s cubic-bezier(0.4, 0, 0.2, 1)';
-        loginScreen.style.opacity = '0';
-        loginScreen.style.transform = 'scale(0.9) translateY(-50px)';
-        
-        // Después de la animación de salida, mostrar dashboard
-        setTimeout(() => {
-            loginScreen.classList.remove('active');
-            loginScreen.style.transition = '';
-            loginScreen.style.opacity = '';
-            loginScreen.style.transform = '';
-            
-            // Mostrar dashboard con animación
-            dashboardScreen.classList.add('active');
-            dashboardScreen.classList.add('scale-in');
-            
-            // Remover la clase de animación después de completarse con transición suave
-            setTimeout(() => {
-                dashboardScreen.style.transition = 'all 0.3s ease-out';
-                dashboardScreen.classList.remove('scale-in');
-                setTimeout(() => {
-                    dashboardScreen.style.transition = '';
-                }, 300);
-            }, 700);
-            
-            // Cargar datos del dashboard
-            loadDashboard();
-        }, 700);
+function applyLanguage(lang) {
+    const t = translations[lang] || translations['es'];
+    // Navbar
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+        if (btn.textContent.includes('Dashboard')) btn.innerHTML = `<i class="fas fa-tachometer-alt"></i> ${t.dashboard}`;
+        if (btn.textContent.includes('Clientes') || btn.textContent.includes('Clients')) btn.innerHTML = `<i class="fas fa-users"></i> ${t.clientes}`;
+        if (btn.textContent.includes('Ventas') || btn.textContent.includes('Sales')) btn.innerHTML = `<i class="fas fa-shopping-cart"></i> ${t.ventas}`;
+        if (btn.textContent.includes('Productos') || btn.textContent.includes('Products')) btn.innerHTML = `<i class="fas fa-box"></i> ${t.productos}`;
+        if (btn.textContent.includes('Administradores') || btn.textContent.includes('Admins')) btn.innerHTML = `<i class="fas fa-user-shield"></i> ${t.administradores}`;
+        if (btn.textContent.includes('Reportes') || btn.textContent.includes('Reports')) btn.innerHTML = `<i class="fas fa-chart-bar"></i> ${t.reportes}`;
+        if (btn.textContent.includes('Configuración') || btn.textContent.includes('Settings')) btn.innerHTML = `<i class="fas fa-cog"></i> ${t.configuracion}`;
+        if (btn.textContent.includes('Salir') || btn.textContent.includes('Logout')) btn.innerHTML = `<i class="fas fa-sign-out-alt"></i> ${t.salir}`;
+    });
+    // Títulos principales
+    const mainTitles = [
+        { id: 'dashboardScreen', key: 'dashboard' },
+        { id: 'clientesScreen', key: 'clientes' },
+        { id: 'ventasScreen', key: 'ventas' },
+        { id: 'productosScreen', key: 'productos' },
+        { id: 'administradoresScreen', key: 'administradores' },
+        { id: 'reportesScreen', key: 'reportes' },
+        { id: 'configuracionScreen', key: 'configuracion' }
+    ];
+    mainTitles.forEach(({ id, key }) => {
+        const el = document.querySelector(`#${id} h1`);
+        if (el) el.textContent = t[key];
+    });
+    // Otros textos de configuración
+    document.querySelector('label[for="fontFamilySelect"]').innerHTML = `<i class="fas fa-font"></i> ${t.fuente}`;
+    document.querySelector('label[for="languageSelect"]').innerHTML = `<i class="fas fa-language"></i> ${t.idioma}`;
+    document.querySelector('label[for="notificationsToggle"]').innerHTML = `<i class="fas fa-bell"></i> ${t.notificaciones}`;
+    document.querySelector('label[for="animationsToggle"]').innerHTML = `<i class="fas fa-magic"></i> ${t.animaciones}`;
+    document.querySelector('#resetSettingsBtn').innerHTML = `<i class="fas fa-trash-alt"></i> ${t.restablecer}`;
+    document.querySelector('.config-section.glass-box h2').textContent = t.apariencia || 'Apariencia';
+    document.querySelectorAll('.config-section.glass-box h2')[1].textContent = t.preferencias || 'Preferencias';
+    document.querySelectorAll('.config-section.glass-box h2')[2].textContent = t.sistema || 'Sistema';
+}
+
+function applyFont(font) {
+    let family = 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif';
+    if (font === 'serif') family = 'Georgia, Times New Roman, serif';
+    if (font === 'monospace') family = 'Consolas, Courier New, monospace';
+    document.body.style.fontFamily = family;
+}
+
+function applySettings(settings) {
+    // Tamaño de fuente
+    const fontSizePercentage = parseFloat(settings.fontSize) * 100;
+    document.documentElement.style.fontSize = `${fontSizePercentage}%`;
+    // Fuente
+    applyFont(settings.fontFamily || 'sans-serif');
+    // Animaciones
+    if (settings.animationsEnabled) {
+        document.body.classList.remove('animations-disabled');
     } else {
-        // Fallback si no se encuentran las pantallas
-        showScreen('dashboard');
-        loadDashboard();
+        document.body.classList.add('animations-disabled');
+    }
+    // Idioma
+    applyLanguage(settings.language || 'es');
+    // Actualizar fuentes de las gráficas
+    updateChartFontSizes(settings.fontSize);
+}
+
+function saveSettings(settings) {
+    localStorage.setItem('userSettings', JSON.stringify(settings));
+}
+
+function loadSettings() {
+    const savedSettings = localStorage.getItem('userSettings');
+    let settings = {
+        fontSize: 1,
+        fontFamily: 'sans-serif',
+        language: 'es',
+        animationsEnabled: true,
+        notificationsEnabled: true
+    };
+    if (savedSettings) {
+        settings = { ...settings, ...JSON.parse(savedSettings) };
+    }
+    applySettings(settings);
+    // Actualizar controles
+    document.getElementById('fontSizeSlider').value = settings.fontSize;
+    document.getElementById('fontFamilySelect').value = settings.fontFamily;
+    document.getElementById('languageSelect').value = settings.language;
+    document.getElementById('animationsToggle').checked = settings.animationsEnabled;
+    document.getElementById('notificationsToggle').checked = settings.notificationsEnabled;
+}
+
+function resetSettings() {
+    if (confirm('¿Está seguro de que desea restablecer todos los ajustes a sus valores predeterminados?')) {
+        const defaultSettings = {
+            fontSize: 1,
+            fontFamily: 'sans-serif',
+            language: 'es',
+            animationsEnabled: true,
+            notificationsEnabled: true
+        };
+        saveSettings(defaultSettings);
+        applySettings(defaultSettings);
+        document.getElementById('fontSizeSlider').value = defaultSettings.fontSize;
+        document.getElementById('fontFamilySelect').value = defaultSettings.fontFamily;
+        document.getElementById('languageSelect').value = defaultSettings.language;
+        document.getElementById('animationsToggle').checked = defaultSettings.animationsEnabled;
+        document.getElementById('notificationsToggle').checked = defaultSettings.notificationsEnabled;
+        showAlert('Los ajustes se han restablecido.', 'info');
+    }
+}
+
+function setupConfigurationListeners() {
+    const fontSizeSlider = document.getElementById('fontSizeSlider');
+    const fontFamilySelect = document.getElementById('fontFamilySelect');
+    const languageSelect = document.getElementById('languageSelect');
+    const animationsToggle = document.getElementById('animationsToggle');
+    const notificationsToggle = document.getElementById('notificationsToggle');
+    const resetBtn = document.getElementById('resetSettingsBtn');
+
+    fontSizeSlider.addEventListener('input', (e) => {
+        const newSizeMultiplier = e.target.value;
+        const fontSizePercentage = parseFloat(newSizeMultiplier) * 100;
+        document.documentElement.style.fontSize = `${fontSizePercentage}%`;
+        updateChartFontSizes(newSizeMultiplier);
+    });
+    fontSizeSlider.addEventListener('change', (e) => {
+        const settings = JSON.parse(localStorage.getItem('userSettings') || '{}');
+        settings.fontSize = e.target.value;
+        saveSettings(settings);
+        showAlert('Tamaño de fuente guardado.', 'success');
+    });
+    fontFamilySelect.addEventListener('change', (e) => {
+        const font = e.target.value;
+        applyFont(font);
+        const settings = JSON.parse(localStorage.getItem('userSettings') || '{}');
+        settings.fontFamily = font;
+        saveSettings(settings);
+        showAlert('Fuente guardada.', 'success');
+    });
+    languageSelect.addEventListener('change', (e) => {
+        const lang = e.target.value;
+        applyLanguage(lang);
+        const settings = JSON.parse(localStorage.getItem('userSettings') || '{}');
+        settings.language = lang;
+        saveSettings(settings);
+        showAlert('Idioma guardado.', 'success');
+    });
+    animationsToggle.addEventListener('change', (e) => {
+        const enabled = e.target.checked;
+        const settings = JSON.parse(localStorage.getItem('userSettings') || '{}');
+        settings.animationsEnabled = enabled;
+        if (enabled) {
+            document.body.classList.remove('animations-disabled');
+        } else {
+            document.body.classList.add('animations-disabled');
+        }
+        saveSettings(settings);
+        showAlert(`Animaciones ${enabled ? 'activadas' : 'desactivadas'}.`, 'success');
+    });
+    notificationsToggle.addEventListener('change', (e) => {
+        const enabled = e.target.checked;
+        const settings = JSON.parse(localStorage.getItem('userSettings') || '{}');
+        settings.notificationsEnabled = enabled;
+        saveSettings(settings);
+        showAlert(`Notificaciones ${enabled ? 'activadas' : 'desactivadas'}.`, 'success');
+    });
+    resetBtn.addEventListener('click', resetSettings);
+}
+
+// Variables para las gráficas
+let dashboardChart = null;
+let ventasChart = null;
+let membresiasChart = null;
+
+// Función para inicializar la gráfica del Dashboard
+function initDashboardChart() {
+    const ctx = document.getElementById('dashboardChart').getContext('2d');
+    const data = {
+        labels: [],
+        datasets: [{
+            label: 'Ingresos (Últimos 7 Días)',
+            data: [],
+            backgroundColor: 'rgba(0, 242, 255, 0.2)',
+            borderColor: neonCyan,
+            borderWidth: 3,
+            pointBackgroundColor: neonCyan,
+            pointBorderColor: '#fff',
+            pointHoverBackgroundColor: '#fff',
+            pointHoverBorderColor: neonCyan,
+            pointRadius: 6,
+            pointHoverRadius: 8,
+            tension: 0.4,
+            fill: true
+        }]
+    };
+
+    const config = {
+        type: 'line',
+        data: data,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: textColor,
+                        font: {
+                            size: 14,
+                            weight: 'bold'
+                        },
+                        callback: function(value) {
+                            return '$' + value.toFixed(2);
+                        }
+                    },
+                    grid: {
+                        color: gridColor,
+                        lineWidth: 1
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: textColor,
+                        font: {
+                            size: 14,
+                            weight: 'bold'
+                        }
+                    },
+                    grid: {
+                        color: gridColor,
+                        lineWidth: 1
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    labels: {
+                        color: textColor,
+                        font: {
+                            size: 16,
+                            weight: 'bold'
+                        },
+                        usePointStyle: true,
+                        pointStyle: 'circle'
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(13, 2, 33, 0.9)',
+                    titleColor: neonCyan,
+                    bodyColor: textColor,
+                    borderColor: neonCyan,
+                    borderWidth: 1,
+                    cornerRadius: 8,
+                    displayColors: false,
+                    callbacks: {
+                        label: function(context) {
+                            return 'Ingresos: $' + context.parsed.y.toFixed(2);
+                        }
+                    }
+                }
+            }
+        }
+    };
+
+    dashboardChart = new Chart(ctx, config);
+}
+
+// Función para inicializar las gráficas de Reportes
+function initReportesCharts() {
+    // Gráfica de Ventas Mensuales (Barras)
+    const ventasCtx = document.getElementById('ventasChart').getContext('2d');
+    const ventasData = {
+        labels: [],
+        datasets: [{
+            label: 'Ventas Mensuales',
+            data: [],
+            backgroundColor: [
+                'rgba(159, 47, 255, 0.8)',
+                'rgba(0, 242, 255, 0.8)',
+                'rgba(223, 255, 0, 0.8)',
+                'rgba(255, 58, 87, 0.8)',
+                'rgba(40, 201, 151, 0.8)',
+                'rgba(255, 193, 7, 0.8)',
+                'rgba(108, 117, 125, 0.8)',
+                'rgba(23, 162, 184, 0.8)',
+                'rgba(40, 167, 69, 0.8)',
+                'rgba(220, 53, 69, 0.8)',
+                'rgba(102, 16, 242, 0.8)',
+                'rgba(255, 64, 129, 0.8)'
+            ],
+            borderColor: neonPurple,
+            borderWidth: 2,
+            borderRadius: 8,
+            borderSkipped: false,
+            hoverBackgroundColor: 'rgba(159, 47, 255, 1)',
+            hoverBorderColor: neonCyan,
+            hoverBorderWidth: 3
+        }]
+    };
+    ventasChart = new Chart(ventasCtx, {
+        type: 'bar',
+        data: ventasData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            },
+            scales: {
+                y: { 
+                    beginAtZero: true, 
+                    ticks: { 
+                        color: textColor, 
+                        font: { 
+                            weight: 'bold',
+                            size: 14
+                        },
+                        callback: function(value) {
+                            return '$' + value.toFixed(2);
+                        }
+                    },
+                    grid: {
+                        color: gridColor,
+                        lineWidth: 1
+                    }
+                },
+                x: { 
+                    ticks: { 
+                        color: textColor, 
+                        font: { 
+                            weight: 'bold',
+                            size: 14
+                        }
+                    },
+                    grid: {
+                        color: gridColor,
+                        lineWidth: 1
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    labels: { 
+                        color: textColor, 
+                        font: { 
+                            size: 14, 
+                            weight: 'bold' 
+                        }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(13, 2, 33, 0.9)',
+                    titleColor: neonPurple,
+                    bodyColor: textColor,
+                    borderColor: neonPurple,
+                    borderWidth: 1,
+                    cornerRadius: 8,
+                    callbacks: {
+                        label: function(context) {
+                            return 'Ventas: $' + context.parsed.y.toFixed(2);
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Gráfica de Ventas por Membresía (Pastel)
+    const membresiasCtx = document.getElementById('membresiasChart').getContext('2d');
+    const membresiasData = {
+        labels: [],
+        datasets: [{
+            label: 'Clientes por Membresía',
+            data: [],
+            backgroundColor: [
+                'rgba(159, 47, 255, 0.8)',
+                'rgba(0, 242, 255, 0.8)',
+                'rgba(223, 255, 0, 0.8)',
+                'rgba(255, 58, 87, 0.8)',
+                'rgba(40, 201, 151, 0.8)',
+                'rgba(255, 193, 7, 0.8)',
+                'rgba(108, 117, 125, 0.8)',
+                'rgba(23, 162, 184, 0.8)'
+            ],
+            borderColor: [
+                'rgba(159, 47, 255, 1)',
+                'rgba(0, 242, 255, 1)',
+                'rgba(223, 255, 0, 1)',
+                'rgba(255, 58, 87, 1)',
+                'rgba(40, 201, 151, 1)',
+                'rgba(255, 193, 7, 1)',
+                'rgba(108, 117, 125, 1)',
+                'rgba(23, 162, 184, 1)'
+            ],
+            borderWidth: 2,
+            hoverBorderWidth: 4,
+            hoverOffset: 10
+        }]
+    };
+    membresiasChart = new Chart(membresiasCtx, {
+        type: 'doughnut',
+        data: membresiasData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '60%',
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        color: textColor,
+                        font: {
+                            size: 14,
+                            weight: 'bold'
+                        },
+                        usePointStyle: true,
+                        pointStyle: 'circle',
+                        padding: 20
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(13, 2, 33, 0.9)',
+                    titleColor: neonCyan,
+                    bodyColor: textColor,
+                    borderColor: neonCyan,
+                    borderWidth: 1,
+                    cornerRadius: 8,
+                    callbacks: {
+                        label: function(context) {
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((context.parsed / total) * 100).toFixed(1);
+                            return context.label + ': ' + context.parsed + ' (' + percentage + '%)';
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Función para cargar todos los datos del dashboard
+async function loadDashboardData() {
+    try {
+        const responseStats = await fetch('/api/dashboard/stats');
+        const stats = await responseStats.json();
+        document.getElementById('totalClientes').textContent = stats.totalClientes;
+        document.getElementById('ventasDia').textContent = `$${(stats.ventasDia || 0).toFixed(2)}`;
+        document.getElementById('productosStock').textContent = stats.stockTotal || 0;
+
+        const responseChart = await fetch('/api/dashboard/ventas-semanales');
+        const chartData = await responseChart.json();
+        if (dashboardChart) {
+            dashboardChart.data.labels = chartData.labels;
+            dashboardChart.data.datasets[0].data = chartData.data;
+            dashboardChart.update('active');
+        }
+
+    } catch (error) {
+        console.error('Error al cargar datos del dashboard:', error);
+        document.getElementById('totalClientes').textContent = 'N/A';
+        document.getElementById('ventasDia').textContent = 'N/A';
+        document.getElementById('productosStock').textContent = 'N/A';
     }
 } 

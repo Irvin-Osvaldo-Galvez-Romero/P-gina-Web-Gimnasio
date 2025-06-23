@@ -14,7 +14,7 @@
         <div class="login-container">
             <div class="login-box">
                 <div class="logo-container">
-                    <img src="Imagenes/Logo.png" alt="Logo Gimnasio" class="logo">
+                    <img src="Imagenes/Logo2.png" alt="Logo Gimnasio" class="logo">
                 </div>
                 <h2>Iniciar Sesión</h2>
                 <form id="loginForm">
@@ -39,7 +39,7 @@
     <div id="dashboardScreen" class="screen">
         <nav class="navbar">
             <div class="nav-brand">
-                <img src="Imagenes/Logo.png" alt="Logo" class="nav-logo">
+                <img src="Imagenes/Logo2.png" alt="Logo" class="nav-logo">
                 <span>Gimnasio</span>
             </div>
             <div class="nav-menu">
@@ -60,6 +60,9 @@
                 </button>
                 <button class="nav-btn" onclick="showScreen('reportes')">
                     <i class="fas fa-chart-bar"></i> Reportes
+                </button>
+                <button class="nav-btn" onclick="showScreen('configuracion')">
+                    <i class="fas fa-cog"></i> Configuración
                 </button>
                 <button class="nav-btn logout-btn" onclick="showScreen('salir')">
                     <i class="fas fa-sign-out-alt"></i> Salir
@@ -112,7 +115,7 @@
     <div id="clientesScreen" class="screen">
         <nav class="navbar">
             <div class="nav-brand">
-                <img src="Imagenes/Logo.png" alt="Logo" class="nav-logo">
+                <img src="Imagenes/Logo2.png" alt="Logo" class="nav-logo">
                 <span>Gimnasio</span>
             </div>
             <div class="nav-menu">
@@ -133,6 +136,9 @@
                 </button>
                 <button class="nav-btn" onclick="showScreen('reportes')">
                     <i class="fas fa-chart-bar"></i> Reportes
+                </button>
+                <button class="nav-btn" onclick="showScreen('configuracion')">
+                    <i class="fas fa-cog"></i> Configuración
                 </button>
                 <button class="nav-btn logout-btn" onclick="showScreen('salir')">
                     <i class="fas fa-sign-out-alt"></i> Salir
@@ -239,7 +245,7 @@
     <div id="ventasScreen" class="screen">
         <nav class="navbar">
             <div class="nav-brand">
-                <img src="Imagenes/Logo.png" alt="Logo" class="nav-logo">
+                <img src="Imagenes/Logo2.png" alt="Logo" class="nav-logo">
                 <span>Gimnasio</span>
             </div>
             <div class="nav-menu">
@@ -260,6 +266,9 @@
                 </button>
                 <button class="nav-btn" onclick="showScreen('reportes')">
                     <i class="fas fa-chart-bar"></i> Reportes
+                </button>
+                <button class="nav-btn" onclick="showScreen('configuracion')">
+                    <i class="fas fa-cog"></i> Configuración
                 </button>
                 <button class="nav-btn logout-btn" onclick="showScreen('salir')">
                     <i class="fas fa-sign-out-alt"></i> Salir
@@ -295,7 +304,7 @@
     <div id="productosScreen" class="screen">
         <nav class="navbar">
             <div class="nav-brand">
-                <img src="Imagenes/Logo.png" alt="Logo" class="nav-logo">
+                <img src="Imagenes/Logo2.png" alt="Logo" class="nav-logo">
                 <span>Gimnasio</span>
             </div>
             <div class="nav-menu">
@@ -316,6 +325,9 @@
                 </button>
                 <button class="nav-btn" onclick="showScreen('reportes')">
                     <i class="fas fa-chart-bar"></i> Reportes
+                </button>
+                <button class="nav-btn" onclick="showScreen('configuracion')">
+                    <i class="fas fa-cog"></i> Configuración
                 </button>
                 <button class="nav-btn logout-btn" onclick="showScreen('salir')">
                     <i class="fas fa-sign-out-alt"></i> Salir
@@ -397,7 +409,7 @@
     <div id="administradoresScreen" class="screen">
         <nav class="navbar">
             <div class="nav-brand">
-                <img src="Imagenes/Logo.png" alt="Logo" class="nav-logo">
+                <img src="Imagenes/Logo2.png" alt="Logo" class="nav-logo">
                 <span>Gimnasio</span>
             </div>
             <div class="nav-menu">
@@ -418,6 +430,9 @@
                 </button>
                 <button class="nav-btn" onclick="showScreen('reportes')">
                     <i class="fas fa-chart-bar"></i> Reportes
+                </button>
+                <button class="nav-btn" onclick="showScreen('configuracion')">
+                    <i class="fas fa-cog"></i> Configuración
                 </button>
                 <button class="nav-btn logout-btn" onclick="showScreen('salir')">
                     <i class="fas fa-sign-out-alt"></i> Salir
@@ -502,7 +517,7 @@
     <div id="reportesScreen" class="screen">
         <nav class="navbar">
             <div class="nav-brand">
-                <img src="Imagenes/Logo.png" alt="Logo" class="nav-logo">
+                <img src="Imagenes/Logo2.png" alt="Logo" class="nav-logo">
                 <span>Gimnasio</span>
             </div>
             <div class="nav-menu">
@@ -523,6 +538,9 @@
                 </button>
                 <button class="nav-btn active" onclick="showScreen('reportes')">
                     <i class="fas fa-chart-bar"></i> Reportes
+                </button>
+                <button class="nav-btn" onclick="showScreen('configuracion')">
+                    <i class="fas fa-cog"></i> Configuración
                 </button>
                 <button class="nav-btn logout-btn" onclick="showScreen('salir')">
                     <i class="fas fa-sign-out-alt"></i> Salir
@@ -574,6 +592,117 @@
                 <div class="chart-wrapper">
                     <h3>Ventas por Membresía</h3>
                     <canvas id="membresiasChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Configuracion Screen -->
+    <div id="configuracionScreen" class="screen">
+        <nav class="navbar">
+            <div class="nav-brand">
+                <img src="Imagenes/Logo2.png" alt="Logo" class="nav-logo">
+                <span>Gimnasio</span>
+            </div>
+            <div class="nav-menu">
+                <button class="nav-btn" onclick="showScreen('dashboard')">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </button>
+                <button class="nav-btn" onclick="showScreen('clientes')">
+                    <i class="fas fa-users"></i> Clientes
+                </button>
+                <button class="nav-btn" onclick="showScreen('ventas')">
+                    <i class="fas fa-shopping-cart"></i> Ventas
+                </button>
+                <button class="nav-btn" onclick="showScreen('productos')">
+                    <i class="fas fa-box"></i> Productos
+                </button>
+                <button class="nav-btn" onclick="showScreen('administradores')">
+                    <i class="fas fa-user-shield"></i> Administradores
+                </button>
+                <button class="nav-btn" onclick="showScreen('reportes')">
+                    <i class="fas fa-chart-bar"></i> Reportes
+                </button>
+                <button class="nav-btn active" onclick="showScreen('configuracion')">
+                    <i class="fas fa-cog"></i> Configuración
+                </button>
+                <button class="nav-btn logout-btn" onclick="showScreen('salir')">
+                    <i class="fas fa-sign-out-alt"></i> Salir
+                </button>
+            </div>
+        </nav>
+
+        <div class="content">
+            <div class="content-header">
+                <h1>Configuración</h1>
+            </div>
+
+            <div class="config-container">
+                <div class="config-section glass-box">
+                    <h2>Apariencia</h2>
+                    <div class="config-option">
+                        <label for="fontSizeSlider">
+                            <i class="fas fa-text-height"></i> Tamaño de Fuente
+                        </label>
+                        <div class="font-size-control">
+                            <span>Pequeño</span>
+                            <input type="range" id="fontSizeSlider" min="0.8" max="1.2" step="0.1" value="1">
+                            <span>Grande</span>
+                        </div>
+                    </div>
+                    <div class="config-option">
+                        <label for="fontFamilySelect">
+                            <i class="fas fa-font"></i> Fuente
+                        </label>
+                        <select id="fontFamilySelect">
+                            <option value="sans-serif">Sans-serif</option>
+                            <option value="serif">Serif</option>
+                            <option value="monospace">Monospace</option>
+                        </select>
+                    </div>
+                    <div class="config-option">
+                        <label for="animationsToggle">
+                            <i class="fas fa-magic"></i> Animaciones de Interfaz
+                        </label>
+                        <label class="switch">
+                            <input type="checkbox" id="animationsToggle" checked>
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="config-section glass-box">
+                    <h2>Preferencias</h2>
+                    <div class="config-option">
+                        <label for="languageSelect">
+                            <i class="fas fa-language"></i> Idioma
+                        </label>
+                        <select id="languageSelect">
+                            <option value="es">Español</option>
+                            <option value="en">English</option>
+                        </select>
+                    </div>
+                    <div class="config-option">
+                        <label for="notificationsToggle">
+                            <i class="fas fa-bell"></i> Notificaciones
+                        </label>
+                        <label class="switch">
+                            <input type="checkbox" id="notificationsToggle" checked>
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="config-section glass-box">
+                    <h2>Sistema</h2>
+                    <div class="config-option">
+                        <label>
+                            <i class="fas fa-undo"></i> Restaurar Ajustes
+                        </label>
+                        <button id="resetSettingsBtn" class="btn-danger">
+                            <i class="fas fa-trash-alt"></i> Restablecer
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
