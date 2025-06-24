@@ -29,13 +29,17 @@ body {
     display: none;
     min-height: 100vh;
     opacity: 0;
-    transform: translateY(20px);
-    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateY(10px);
+    transition: opacity 0.4s ease-out, transform 0.4s ease-out;
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
+    will-change: opacity, transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    -moz-backface-visibility: hidden;
 }
 
 .screen.active {
@@ -68,6 +72,12 @@ body {
     box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
     backdrop-filter: blur(10px);
     border: 1px solid var(--glass-border);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    -moz-backface-visibility: hidden;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    -moz-transform: translateZ(0);
 }
 
 .logo-container {
@@ -158,8 +168,14 @@ body {
     position: sticky;
     top: 0;
     z-index: 1000;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s ease-out;
     border-bottom: 1px solid var(--primary-color);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    -moz-backface-visibility: hidden;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    -moz-transform: translateZ(0);
 }
 
 .nav-brand {
@@ -182,13 +198,16 @@ body {
     padding: 12px 20px;
     border-radius: 8px;
     cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s ease-out;
     display: flex;
     align-items: center;
     gap: 8px;
     font-size: 0.875rem;
     position: relative;
     overflow: hidden;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    -moz-backface-visibility: hidden;
 }
 
 .nav-btn::before {
@@ -621,6 +640,12 @@ td .btn-delete i {
     position: relative;
     box-shadow: 0 0 40px var(--glow-color);
     border: 1px solid var(--primary-color);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    -moz-backface-visibility: hidden;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    -moz-transform: translateZ(0);
 }
 
 .close {
@@ -1030,7 +1055,7 @@ td .btn-delete i {
 @keyframes fadeIn {
     from {
         opacity: 0;
-        transform: translateY(20px);
+        transform: translateY(5px);
     }
     to {
         opacity: 1;
@@ -1039,7 +1064,8 @@ td .btn-delete i {
 }
 
 .screen.active {
-    animation: fadeIn 0.5s ease-out;
+    /* Removemos la animación para evitar conflictos con la transición CSS */
+    /* animation: fadeIn 0.5s ease-out; */
 }
 
 /* Alertas */
@@ -1217,14 +1243,15 @@ td .btn-delete i {
 
 /* Transiciones para elementos internos */
 .content, .dashboard-content, .ventas-container, .reportes-content {
-    animation: fadeInUp 0.9s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-    animation-delay: 0.1s;
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.3s ease-out, transform 0.3s ease-out;
 }
 
 .table-container, .stats-cards, .chart-container {
-    animation: scaleIn 0.9s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-    animation-delay: 0.3s;
-    opacity: 0; /* Start hidden for animation */
+    opacity: 1;
+    transform: scale(1);
+    transition: opacity 0.3s ease-out, transform 0.3s ease-out;
 }
 
 /* Transición suave para el navbar */
@@ -1249,13 +1276,16 @@ td .btn-delete i {
     padding: 12px 20px;
     border-radius: 8px;
     cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s ease-out;
     display: flex;
     align-items: center;
     gap: 8px;
     font-size: 0.875rem;
     position: relative;
     overflow: hidden;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    -moz-backface-visibility: hidden;
 }
 
 .nav-btn::before {
@@ -1469,6 +1499,12 @@ input:checked + .slider:before {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), inset 0 0 5px rgba(0,0,0,0.5);
     backdrop-filter: blur(10px);
     border: 1px solid var(--glass-border);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    -moz-backface-visibility: hidden;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    -moz-transform: translateZ(0);
 }
 
 body.animations-disabled *,
