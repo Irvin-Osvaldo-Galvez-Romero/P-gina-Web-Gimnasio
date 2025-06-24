@@ -2075,57 +2075,52 @@ async function loadDashboardData() {
 // --- FUNCIONES DEL HISTORIAL ---
 
 // Función para cargar el historial
-function loadHistorial() {
+async function loadHistorial() {
     console.log('📋 Cargando historial...');
-    renderSuscripcionesTable();
+    await renderSuscripcionesTable();
     renderHistorialTable();
     setupHistorialSearch();
 }
 
 // Función para renderizar la tabla de suscripciones que terminan pronto
-function renderSuscripcionesTable() {
+async function renderSuscripcionesTable() {
     const tbody = document.getElementById('suscripcionesTableBody');
     if (!tbody) return;
 
     tbody.innerHTML = '';
-    
-    const suscripcionesProximas = clientes
-        .map(cliente => {
-            const fechaInicio = new Date(cliente.fechaInicio || new Date());
-            const fechaFin = calcularFechaFin(cliente.tipoMembresia, fechaInicio);
-            const diasRestantes = Math.ceil((fechaFin - new Date()) / (1000 * 60 * 60 * 24));
-            
-            return {
-                ...cliente,
-                fechaInicio: fechaInicio,
-                fechaFin: fechaFin,
-                diasRestantes: diasRestantes
-            };
-        })
-        .filter(cliente => cliente.diasRestantes <= 30 && cliente.diasRestantes >= -7) // Mostrar suscripciones que vencen en 30 días o vencieron hace 7 días
-        .sort((a, b) => a.diasRestantes - b.diasRestantes);
 
-    suscripcionesProximas.forEach(cliente => {
-        const row = document.createElement('tr');
-        const estado = getEstadoSuscripcion(cliente.diasRestantes);
-        const diasClass = getDiasClass(cliente.diasRestantes);
-        
-        row.innerHTML = `
-            <td>${cliente.id}</td>
-            <td>${cliente.nombre}</td>
-            <td>${cliente.apellidos}</td>
-            <td>${cliente.tipoMembresia}</td>
-            <td>${formatearFecha(cliente.fechaInicio)}</td>
-            <td>${formatearFecha(cliente.fechaFin)}</td>
-            <td class="${diasClass}">${cliente.diasRestantes > 0 ? cliente.diasRestantes + ' días' : 'Vencida hace ' + Math.abs(cliente.diasRestantes) + ' días'}</td>
-            <td><span class="${estado}">${getEstadoTexto(cliente.diasRestantes)}</span></td>
-        `;
-        
-        tbody.appendChild(row);
-    });
+    try {
+        const response = await fetch('/api/suscripciones/terminan-pronto');
+        if (!response.ok) throw new Error('Error al obtener suscripciones');
+        const suscripcionesProximas = await response.json();
 
-    if (suscripcionesProximas.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--text-color);">No hay suscripciones próximas a vencer</td></tr>';
+        suscripcionesProximas.sort((a, b) => a.diasRestantes - b.diasRestantes);
+
+        suscripcionesProximas.forEach(cliente => {
+            const row = document.createElement('tr');
+            const estado = getEstadoSuscripcion(cliente.diasRestantes);
+            const diasClass = getDiasClass(cliente.diasRestantes);
+
+            row.innerHTML = `
+                <td>${cliente.id}</td>
+                <td>${cliente.nombre}</td>
+                <td>${cliente.apellidos}</td>
+                <td>${cliente.tipoMembresia}</td>
+                <td>${formatearFecha(cliente.fechaInicio)}</td>
+                <td>${formatearFecha(cliente.fechaFin)}</td>
+                <td class="${diasClass}">${cliente.diasRestantes > 0 ? cliente.diasRestantes + ' días' : 'Vencida hace ' + Math.abs(cliente.diasRestantes) + ' días'}</td>
+                <td><span class="${estado}">${getEstadoTexto(cliente.diasRestantes)}</span></td>
+            `;
+
+            tbody.appendChild(row);
+        });
+
+        if (suscripcionesProximas.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--text-color);">No hay suscripciones próximas a vencer</td></tr>';
+        }
+    } catch (error) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--text-color);">Error al cargar suscripciones</td></tr>';
+        console.error('Error al cargar suscripciones que terminan pronto:', error);
     }
 }
 
@@ -2138,7 +2133,7 @@ function renderHistorialTable() {
     
     const historialCompleto = clientes.map(cliente => {
         const fechaInicio = new Date(cliente.fechaInicio || new Date());
-        const fechaFin = calcularFechaFin(cliente.tipoMembresia, fechaInicio);
+        const fechaFin = new Date(cliente.fechaFin);
         const diasRestantes = Math.ceil((fechaFin - new Date()) / (1000 * 60 * 60 * 24));
         
         return {
@@ -2147,7 +2142,10 @@ function renderHistorialTable() {
             fechaFin: fechaFin,
             diasRestantes: diasRestantes
         };
-    }).sort((a, b) => b.fechaInicio - a.fechaInicio); // Ordenar por fecha de registro más reciente
+    })
+    // Solo mostrar clientes con membresía ACTIVA (más de 7 días restantes)
+    .filter(cliente => cliente.diasRestantes > 7)
+    .sort((a, b) => b.fechaInicio - a.fechaInicio); // Ordenar por fecha de registro más reciente
 
     historialCompleto.forEach(cliente => {
         const row = document.createElement('tr');
@@ -2167,6 +2165,10 @@ function renderHistorialTable() {
         
         tbody.appendChild(row);
     });
+
+    if (historialCompleto.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: var(--text-color);">No hay clientes con membresía activa</td></tr>';
+    }
 }
 
 // Función para configurar la búsqueda del historial

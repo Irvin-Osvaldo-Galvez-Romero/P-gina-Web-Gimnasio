@@ -738,6 +738,44 @@ app.post('/api/ventas', async (req, res) => {
     }
 });
 
+// Endpoint para obtener suscripciones que terminan pronto o ya expiraron
+app.get('/api/suscripciones/terminan-pronto', async (req, res) => {
+    try {
+        const client = await getMongoConnection();
+        const db = client.db();
+        const clientesCollection = db.collection('clientes');
+        
+        const hoy = new Date();
+        const unaSemanaDespues = new Date(hoy.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+        // Buscar clientes cuya membresía expira en <= 7 días o ya expiró
+        const clientes = await clientesCollection.find({
+            fechaFin: { $lte: unaSemanaDespues }
+        }).toArray();
+
+        // Formatear respuesta
+        const resultado = clientes.map(cliente => {
+            const fechaFin = new Date(cliente.fechaFin);
+            const diasRestantes = Math.ceil((fechaFin - hoy) / (1000 * 60 * 60 * 24));
+            return {
+                id: cliente.id || cliente._id,
+                nombre: cliente.nombre,
+                apellidos: cliente.apellidos,
+                tipoMembresia: cliente.tipoMembresia,
+                fechaInicio: cliente.fechaInicio,
+                fechaFin: cliente.fechaFin,
+                diasRestantes: diasRestantes,
+                estado: diasRestantes < 0 ? 'VENCIDA' : (diasRestantes <= 7 ? 'PRÓXIMO A VENCER' : 'ACTIVA')
+            };
+        });
+
+        res.json(resultado);
+    } catch (error) {
+        console.error('Error obteniendo suscripciones que terminan pronto:', error);
+        res.status(500).json({ error: 'Error interno del servidor' });
+    }
+});
+
 // Manejo de cierre graceful
 process.on('SIGINT', async () => {
     console.log('\n🔄 Cerrando servidor...');
