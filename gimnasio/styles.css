@@ -1489,13 +1489,55 @@ body.animations-disabled *::after {
     font-size: 1rem;
     font-family: inherit;
     outline: none;
-    transition: border 0.3s, box-shadow 0.3s;
+    transition: all 0.3s ease;
     box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    cursor: pointer;
 }
 
 .config-option select:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 10px var(--primary-color);
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 15px var(--secondary-color);
+    background: rgba(0, 242, 255, 0.1);
+}
+
+.config-option select:hover {
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 10px var(--secondary-color);
+    transform: translateY(-1px);
+}
+
+/* Estilo específico para el select de fuentes */
+#fontFamilySelect {
+    background: linear-gradient(135deg, rgba(0,0,0,0.3), rgba(0, 242, 255, 0.1));
+    border: 1px solid var(--secondary-color);
+    color: var(--secondary-color);
+    font-weight: 600;
+    text-shadow: 0 0 5px var(--secondary-color);
+}
+
+#fontFamilySelect:focus {
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 20px var(--secondary-color), inset 0 0 10px rgba(0, 242, 255, 0.2);
+    background: linear-gradient(135deg, rgba(0,0,0,0.4), rgba(0, 242, 255, 0.2));
+}
+
+#fontFamilySelect:hover {
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 15px var(--secondary-color), inset 0 0 5px rgba(0, 242, 255, 0.1);
+    background: linear-gradient(135deg, rgba(0,0,0,0.3), rgba(0, 242, 255, 0.15));
+}
+
+/* Estilo para las opciones del select */
+#fontFamilySelect option {
+    background: var(--bg-color-dark);
+    color: var(--secondary-color);
+    font-weight: 600;
+    padding: 8px;
+}
+
+#fontFamilySelect option:hover {
+    background: var(--secondary-color);
+    color: var(--bg-color-dark);
 }
 
 /* Ajuste para el switch de notificaciones */
@@ -1516,5 +1558,43 @@ body.animations-disabled *::after {
 /* Ajuste para el icono de idioma y fuente */
 .config-option i.fas.fa-language,
 .config-option i.fas.fa-font {
-    color: var(--accent-color);
+    color: var(--secondary-color);
+    text-shadow: 0 0 8px var(--secondary-color);
+    filter: drop-shadow(0 0 5px var(--secondary-color));
+}
+
+/* Estilo específico para el select de idioma */
+#languageSelect {
+    background: linear-gradient(135deg, rgba(0,0,0,0.3), rgba(0, 242, 255, 0.1));
+    border: 1px solid var(--secondary-color);
+    color: var(--secondary-color);
+    font-weight: 600;
+    text-shadow: 0 0 5px var(--secondary-color);
+}
+
+#languageSelect:focus {
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 20px var(--secondary-color), inset 0 0 10px rgba(0, 242, 255, 0.2);
+    background: linear-gradient(135deg, rgba(0,0,0,0.4), rgba(0, 242, 255, 0.2));
+}
+
+#languageSelect:hover {
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 15px var(--secondary-color), inset 0 0 5px rgba(0, 242, 255, 0.1);
+    background: linear-gradient(135deg, rgba(0,0,0,0.3), rgba(0, 242, 255, 0.15));
+}
+
+/* Estilo para las opciones del select */
+#fontFamilySelect option,
+#languageSelect option {
+    background: var(--bg-color-dark);
+    color: var(--secondary-color);
+    font-weight: 600;
+    padding: 8px;
+}
+
+#fontFamilySelect option:hover,
+#languageSelect option:hover {
+    background: var(--secondary-color);
+    color: var(--bg-color-dark);
 } 
