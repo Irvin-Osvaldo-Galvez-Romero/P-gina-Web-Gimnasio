@@ -101,7 +101,32 @@ async function cargarDatosDesdeMongoDB() {
 function cargarDatosEjemplo() {
     console.log('⚠️ Usando datos de ejemplo (fallback)');
     
-    // Datos de ejemplo para clientes
+    // Obtener fecha actual
+    const hoy = new Date();
+    
+    // Calcular fechas para suscripciones que terminen pronto
+    const fechaVenceHoy = new Date(hoy);
+    fechaVenceHoy.setDate(hoy.getDate());
+    
+    const fechaVence3Dias = new Date(hoy);
+    fechaVence3Dias.setDate(hoy.getDate() + 3);
+    
+    const fechaVence7Dias = new Date(hoy);
+    fechaVence7Dias.setDate(hoy.getDate() + 7);
+    
+    const fechaVence15Dias = new Date(hoy);
+    fechaVence15Dias.setDate(hoy.getDate() + 15);
+    
+    const fechaVence30Dias = new Date(hoy);
+    fechaVence30Dias.setDate(hoy.getDate() + 30);
+    
+    const fechaVencida2Dias = new Date(hoy);
+    fechaVencida2Dias.setDate(hoy.getDate() - 2);
+    
+    const fechaVencida5Dias = new Date(hoy);
+    fechaVencida5Dias.setDate(hoy.getDate() - 5);
+    
+    // Datos de ejemplo para clientes con suscripciones próximas a vencer
     clientes = [
         {
             _id: '1',
@@ -110,10 +135,10 @@ function cargarDatosEjemplo() {
             edad: 28,
             enfermedadCronica: 'Ninguna',
             alergia: 'Ninguna',
-            tipoMembresia: 'Premium',
+            tipoMembresia: 'Mensual',
             direccion: 'Calle Principal 123, Ciudad',
-            fechaInicio: '2024-01-15',
-            fechaFin: '2024-02-15'
+            fechaInicio: fechaVenceHoy.toISOString().split('T')[0],
+            fechaFin: fechaVenceHoy.toISOString().split('T')[0]
         },
         {
             _id: '2',
@@ -122,10 +147,82 @@ function cargarDatosEjemplo() {
             edad: 32,
             enfermedadCronica: 'Ninguna',
             alergia: 'Ninguna',
-            tipoMembresia: 'Básica',
+            tipoMembresia: 'Trimestral',
             direccion: 'Av. Principal 456, Ciudad',
-            fechaInicio: '2024-01-01',
-            fechaFin: '2024-02-01'
+            fechaInicio: fechaVence3Dias.toISOString().split('T')[0],
+            fechaFin: fechaVence3Dias.toISOString().split('T')[0]
+        },
+        {
+            _id: '3',
+            nombre: 'Carlos',
+            apellidos: 'Rodríguez Martínez',
+            edad: 25,
+            enfermedadCronica: 'Ninguna',
+            alergia: 'Polen',
+            tipoMembresia: 'Semestral',
+            direccion: 'Calle Secundaria 789, Ciudad',
+            fechaInicio: fechaVence7Dias.toISOString().split('T')[0],
+            fechaFin: fechaVence7Dias.toISOString().split('T')[0]
+        },
+        {
+            _id: '4',
+            nombre: 'Ana',
+            apellidos: 'López Sánchez',
+            edad: 29,
+            enfermedadCronica: 'Asma',
+            alergia: 'Ninguna',
+            tipoMembresia: 'Anual',
+            direccion: 'Plaza Mayor 321, Ciudad',
+            fechaInicio: fechaVence15Dias.toISOString().split('T')[0],
+            fechaFin: fechaVence15Dias.toISOString().split('T')[0]
+        },
+        {
+            _id: '5',
+            nombre: 'Roberto',
+            apellidos: 'Fernández Díaz',
+            edad: 35,
+            enfermedadCronica: 'Ninguna',
+            alergia: 'Ninguna',
+            tipoMembresia: 'Mensual',
+            direccion: 'Avenida Central 654, Ciudad',
+            fechaInicio: fechaVence30Dias.toISOString().split('T')[0],
+            fechaFin: fechaVence30Dias.toISOString().split('T')[0]
+        },
+        {
+            _id: '6',
+            nombre: 'Laura',
+            apellidos: 'Martínez Ruiz',
+            edad: 27,
+            enfermedadCronica: 'Ninguna',
+            alergia: 'Ninguna',
+            tipoMembresia: 'Trimestral',
+            direccion: 'Calle Nueva 987, Ciudad',
+            fechaInicio: fechaVencida2Dias.toISOString().split('T')[0],
+            fechaFin: fechaVencida2Dias.toISOString().split('T')[0]
+        },
+        {
+            _id: '7',
+            nombre: 'Miguel',
+            apellidos: 'Sánchez Torres',
+            edad: 31,
+            enfermedadCronica: 'Diabetes',
+            alergia: 'Ninguna',
+            tipoMembresia: 'Semestral',
+            direccion: 'Boulevard Principal 147, Ciudad',
+            fechaInicio: fechaVencida5Dias.toISOString().split('T')[0],
+            fechaFin: fechaVencida5Dias.toISOString().split('T')[0]
+        },
+        {
+            _id: '8',
+            nombre: 'Carmen',
+            apellidos: 'García Morales',
+            edad: 33,
+            enfermedadCronica: 'Ninguna',
+            alergia: 'Ninguna',
+            tipoMembresia: 'Anual',
+            direccion: 'Calle Antigua 258, Ciudad',
+            fechaInicio: '2024-01-15',
+            fechaFin: '2025-01-15'
         }
     ];
     
@@ -245,6 +342,9 @@ function showScreen(screenName) {
             break;
         case 'clientes':
             loadClientes();
+            break;
+        case 'historial':
+            loadHistorial();
             break;
         case 'productos':
             loadProductos();
@@ -1970,4 +2070,162 @@ async function loadDashboardData() {
         document.getElementById('ventasDia').textContent = 'N/A';
         document.getElementById('productosStock').textContent = 'N/A';
     }
+}
+
+// --- FUNCIONES DEL HISTORIAL ---
+
+// Función para cargar el historial
+function loadHistorial() {
+    console.log('📋 Cargando historial...');
+    renderSuscripcionesTable();
+    renderHistorialTable();
+    setupHistorialSearch();
+}
+
+// Función para renderizar la tabla de suscripciones que terminan pronto
+function renderSuscripcionesTable() {
+    const tbody = document.getElementById('suscripcionesTableBody');
+    if (!tbody) return;
+
+    tbody.innerHTML = '';
+    
+    const suscripcionesProximas = clientes
+        .map(cliente => {
+            const fechaInicio = new Date(cliente.fechaInicio || new Date());
+            const fechaFin = calcularFechaFin(cliente.tipoMembresia, fechaInicio);
+            const diasRestantes = Math.ceil((fechaFin - new Date()) / (1000 * 60 * 60 * 24));
+            
+            return {
+                ...cliente,
+                fechaInicio: fechaInicio,
+                fechaFin: fechaFin,
+                diasRestantes: diasRestantes
+            };
+        })
+        .filter(cliente => cliente.diasRestantes <= 30 && cliente.diasRestantes >= -7) // Mostrar suscripciones que vencen en 30 días o vencieron hace 7 días
+        .sort((a, b) => a.diasRestantes - b.diasRestantes);
+
+    suscripcionesProximas.forEach(cliente => {
+        const row = document.createElement('tr');
+        const estado = getEstadoSuscripcion(cliente.diasRestantes);
+        const diasClass = getDiasClass(cliente.diasRestantes);
+        
+        row.innerHTML = `
+            <td>${cliente.id}</td>
+            <td>${cliente.nombre}</td>
+            <td>${cliente.apellidos}</td>
+            <td>${cliente.tipoMembresia}</td>
+            <td>${formatearFecha(cliente.fechaInicio)}</td>
+            <td>${formatearFecha(cliente.fechaFin)}</td>
+            <td class="${diasClass}">${cliente.diasRestantes > 0 ? cliente.diasRestantes + ' días' : 'Vencida hace ' + Math.abs(cliente.diasRestantes) + ' días'}</td>
+            <td><span class="${estado}">${getEstadoTexto(cliente.diasRestantes)}</span></td>
+        `;
+        
+        tbody.appendChild(row);
+    });
+
+    if (suscripcionesProximas.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--text-color);">No hay suscripciones próximas a vencer</td></tr>';
+    }
+}
+
+// Función para renderizar la tabla de historial completo
+function renderHistorialTable() {
+    const tbody = document.getElementById('historialTableBody');
+    if (!tbody) return;
+
+    tbody.innerHTML = '';
+    
+    const historialCompleto = clientes.map(cliente => {
+        const fechaInicio = new Date(cliente.fechaInicio || new Date());
+        const fechaFin = calcularFechaFin(cliente.tipoMembresia, fechaInicio);
+        const diasRestantes = Math.ceil((fechaFin - new Date()) / (1000 * 60 * 60 * 24));
+        
+        return {
+            ...cliente,
+            fechaInicio: fechaInicio,
+            fechaFin: fechaFin,
+            diasRestantes: diasRestantes
+        };
+    }).sort((a, b) => b.fechaInicio - a.fechaInicio); // Ordenar por fecha de registro más reciente
+
+    historialCompleto.forEach(cliente => {
+        const row = document.createElement('tr');
+        const estado = getEstadoSuscripcion(cliente.diasRestantes);
+        
+        row.innerHTML = `
+            <td>${cliente.id}</td>
+            <td>${cliente.nombre}</td>
+            <td>${cliente.apellidos}</td>
+            <td>${cliente.edad}</td>
+            <td>${cliente.tipoMembresia}</td>
+            <td>${formatearFecha(cliente.fechaInicio)}</td>
+            <td>${formatearFecha(cliente.fechaFin)}</td>
+            <td><span class="${estado}">${getEstadoTexto(cliente.diasRestantes)}</span></td>
+            <td>${formatearFecha(cliente.fechaInicio)}</td>
+        `;
+        
+        tbody.appendChild(row);
+    });
+}
+
+// Función para configurar la búsqueda del historial
+function setupHistorialSearch() {
+    const searchInput = document.getElementById('searchHistorial');
+    if (!searchInput) return;
+
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        const rows = document.querySelectorAll('#historialTableBody tr');
+        
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(searchTerm) ? '' : 'none';
+        });
+    });
+}
+
+// Función para obtener el estado de la suscripción
+function getEstadoSuscripcion(diasRestantes) {
+    if (diasRestantes < 0) {
+        return 'estado-vencida';
+    } else if (diasRestantes <= 7) {
+        return 'estado-proximo-vencer';
+    } else {
+        return 'estado-activa';
+    }
+}
+
+// Función para obtener la clase CSS de días restantes
+function getDiasClass(diasRestantes) {
+    if (diasRestantes < 0) {
+        return 'dias-criticos';
+    } else if (diasRestantes <= 7) {
+        return 'dias-advertencia';
+    } else {
+        return 'dias-normales';
+    }
+}
+
+// Función para obtener el texto del estado
+function getEstadoTexto(diasRestantes) {
+    if (diasRestantes < 0) {
+        return 'VENCIDA';
+    } else if (diasRestantes <= 7) {
+        return 'PRÓXIMO A VENCER';
+    } else {
+        return 'ACTIVA';
+    }
+}
+
+// Función para formatear fechas
+function formatearFecha(fecha) {
+    if (!fecha) return 'N/A';
+    
+    const date = new Date(fecha);
+    return date.toLocaleDateString('es-ES', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    });
 } 

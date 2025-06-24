@@ -49,6 +49,9 @@
                 <button class="nav-btn" onclick="showScreen('clientes')">
                     <i class="fas fa-users"></i> Clientes
                 </button>
+                <button class="nav-btn" onclick="showScreen('historial')">
+                    <i class="fas fa-history"></i> Historial
+                </button>
                 <button class="nav-btn" onclick="showScreen('ventas')">
                     <i class="fas fa-shopping-cart"></i> Ventas
                 </button>
@@ -124,6 +127,9 @@
                 </button>
                 <button class="nav-btn active" onclick="showScreen('clientes')">
                     <i class="fas fa-users"></i> Clientes
+                </button>
+                <button class="nav-btn" onclick="showScreen('historial')">
+                    <i class="fas fa-history"></i> Historial
                 </button>
                 <button class="nav-btn" onclick="showScreen('ventas')">
                     <i class="fas fa-shopping-cart"></i> Ventas
@@ -241,6 +247,102 @@
         </div>
     </div>
 
+    <!-- Historial Screen -->
+    <div id="historialScreen" class="screen">
+        <nav class="navbar">
+            <div class="nav-brand">
+                <img src="Imagenes/Logo2.png" alt="Logo" class="nav-logo">
+                <span>Gimnasio</span>
+            </div>
+            <div class="nav-menu">
+                <button class="nav-btn" onclick="showScreen('dashboard')">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </button>
+                <button class="nav-btn" onclick="showScreen('clientes')">
+                    <i class="fas fa-users"></i> Clientes
+                </button>
+                <button class="nav-btn active" onclick="showScreen('historial')">
+                    <i class="fas fa-history"></i> Historial
+                </button>
+                <button class="nav-btn" onclick="showScreen('ventas')">
+                    <i class="fas fa-shopping-cart"></i> Ventas
+                </button>
+                <button class="nav-btn" onclick="showScreen('productos')">
+                    <i class="fas fa-box"></i> Productos
+                </button>
+                <button class="nav-btn" onclick="showScreen('administradores')">
+                    <i class="fas fa-user-shield"></i> Administradores
+                </button>
+                <button class="nav-btn" onclick="showScreen('reportes')">
+                    <i class="fas fa-chart-bar"></i> Reportes
+                </button>
+                <button class="nav-btn" onclick="showScreen('configuracion')">
+                    <i class="fas fa-cog"></i> Configuración
+                </button>
+                <button class="nav-btn logout-btn" onclick="showScreen('salir')">
+                    <i class="fas fa-sign-out-alt"></i> Salir
+                </button>
+            </div>
+        </nav>
+
+        <div class="content">
+            <div class="content-header">
+                <h1>Historial del Gimnasio</h1>
+            </div>
+
+            <!-- Sección de Suscripciones que Terminan Pronto -->
+            <div class="historial-section">
+                <h2><i class="fas fa-clock"></i> Suscripciones que Terminan Pronto</h2>
+                <div class="table-container">
+                    <table id="suscripcionesTable">
+                        <thead>
+                            <tr>
+                                <th>ID Cliente</th>
+                                <th>Nombre</th>
+                                <th>Apellidos</th>
+                                <th>Tipo de Membresía</th>
+                                <th>Fecha de Inicio</th>
+                                <th>Fecha de Vencimiento</th>
+                                <th>Días Restantes</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="suscripcionesTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Sección de Historial Completo -->
+            <div class="historial-section">
+                <h2><i class="fas fa-history"></i> Historial Completo de Clientes</h2>
+                <div class="search-container">
+                    <input type="text" id="searchHistorial" placeholder="Buscar en historial..." class="search-input">
+                    <i class="fas fa-search search-icon"></i>
+                </div>
+                <div class="table-container">
+                    <table id="historialTable">
+                        <thead>
+                            <tr>
+                                <th>ID Cliente</th>
+                                <th>Nombre</th>
+                                <th>Apellidos</th>
+                                <th>Edad</th>
+                                <th>Tipo de Membresía</th>
+                                <th>Fecha de Registro</th>
+                                <th>Fecha de Vencimiento</th>
+                                <th>Estado</th>
+                                <th>Última Actividad</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historialTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Ventas Screen -->
     <div id="ventasScreen" class="screen">
         <nav class="navbar">
@@ -254,6 +356,9 @@
                 </button>
                 <button class="nav-btn" onclick="showScreen('clientes')">
                     <i class="fas fa-users"></i> Clientes
+                </button>
+                <button class="nav-btn" onclick="showScreen('historial')">
+                    <i class="fas fa-history"></i> Historial
                 </button>
                 <button class="nav-btn active" onclick="showScreen('ventas')">
                     <i class="fas fa-shopping-cart"></i> Ventas
@@ -313,6 +418,9 @@
                 </button>
                 <button class="nav-btn" onclick="showScreen('clientes')">
                     <i class="fas fa-users"></i> Clientes
+                </button>
+                <button class="nav-btn" onclick="showScreen('historial')">
+                    <i class="fas fa-history"></i> Historial
                 </button>
                 <button class="nav-btn" onclick="showScreen('ventas')">
                     <i class="fas fa-shopping-cart"></i> Ventas
@@ -418,6 +526,9 @@
                 </button>
                 <button class="nav-btn" onclick="showScreen('clientes')">
                     <i class="fas fa-users"></i> Clientes
+                </button>
+                <button class="nav-btn" onclick="showScreen('historial')">
+                    <i class="fas fa-history"></i> Historial
                 </button>
                 <button class="nav-btn" onclick="showScreen('ventas')">
                     <i class="fas fa-shopping-cart"></i> Ventas
@@ -527,6 +638,9 @@
                 <button class="nav-btn" onclick="showScreen('clientes')">
                     <i class="fas fa-users"></i> Clientes
                 </button>
+                <button class="nav-btn" onclick="showScreen('historial')">
+                    <i class="fas fa-history"></i> Historial
+                </button>
                 <button class="nav-btn" onclick="showScreen('ventas')">
                     <i class="fas fa-shopping-cart"></i> Ventas
                 </button>
@@ -610,6 +724,9 @@
                 </button>
                 <button class="nav-btn" onclick="showScreen('clientes')">
                     <i class="fas fa-users"></i> Clientes
+                </button>
+                <button class="nav-btn" onclick="showScreen('historial')">
+                    <i class="fas fa-history"></i> Historial
                 </button>
                 <button class="nav-btn" onclick="showScreen('ventas')">
                     <i class="fas fa-shopping-cart"></i> Ventas

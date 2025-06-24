@@ -1329,6 +1329,11 @@ td .btn-delete i {
     background-attachment: fixed;
 }
 
+#historialScreen {
+    background: url('Imagenes/3.jpeg') no-repeat center center/cover;
+    background-attachment: fixed;
+}
+
 .reportes-cards .reporte-card:nth-child(1) .reporte-icon {
     background: linear-gradient(135deg, #9f2fff 60%, #6f00ff 100%);
     color: #fff;
@@ -1633,4 +1638,141 @@ body.animations-disabled *::after {
 #languageSelect option:hover {
     background: var(--secondary-color);
     color: var(--bg-color-dark);
+}
+
+/* --- Historial --- */
+.historial-section {
+    margin-bottom: 40px;
+    background: var(--glass-bg);
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+}
+
+.historial-section h2 {
+    color: var(--text-color);
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-shadow: 0 0 5px var(--secondary-color);
+}
+
+.historial-section h2 i {
+    color: var(--secondary-color);
+    text-shadow: 0 0 8px var(--secondary-color);
+}
+
+/* Estilos específicos para las tablas del historial */
+#suscripcionesTable th,
+#historialTable th {
+    background: linear-gradient(135deg, rgba(159, 47, 255, 0.4), rgba(0, 242, 255, 0.4));
+    color: white;
+    padding: 15px 12px;
+    text-align: left;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.875rem;
+    letter-spacing: 0.025em;
+    backdrop-filter: blur(5px);
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+}
+
+#suscripcionesTable td,
+#historialTable td {
+    padding: 12px;
+    border-bottom: 1px solid var(--glass-border);
+    vertical-align: middle;
+    color: var(--text-color);
+    font-size: 0.875rem;
+    font-weight: 400;
+    background: transparent;
+    transition: background-color 0.3s ease;
+}
+
+/* Estados de suscripción */
+.estado-activa {
+    background: linear-gradient(135deg, #28a745, #20c997) !important;
+    color: white !important;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 1px solid #28a745;
+    text-shadow: none !important;
+}
+
+.estado-vencida {
+    background: linear-gradient(135deg, #dc3545, #ff3a57) !important;
+    color: white !important;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 1px solid #dc3545;
+    text-shadow: none !important;
+}
+
+.estado-proximo-vencer {
+    background: linear-gradient(135deg, #ffc107, #e0a800) !important;
+    color: #212529 !important;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 1px solid #ffc107;
+    text-shadow: none !important;
+}
+
+/* Días restantes con colores */
+.dias-criticos {
+    color: #ff3a57 !important;
+    font-weight: 700;
+    text-shadow: 0 0 5px #ff3a57;
+}
+
+.dias-advertencia {
+    color: #ffc107 !important;
+    font-weight: 700;
+    text-shadow: 0 0 5px #ffc107;
+}
+
+.dias-normales {
+    color: #28a745 !important;
+    font-weight: 700;
+    text-shadow: 0 0 5px #28a745;
+}
+
+/* Responsive para historial */
+@media (max-width: 768px) {
+    .historial-section {
+        padding: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .historial-section h2 {
+        font-size: 1.25rem;
+        margin-bottom: 15px;
+    }
+    
+    #suscripcionesTable,
+    #historialTable {
+        font-size: 0.8rem;
+    }
+    
+    #suscripcionesTable th,
+    #historialTable th,
+    #suscripcionesTable td,
+    #historialTable td {
+        padding: 8px 6px;
+    }
 } 
