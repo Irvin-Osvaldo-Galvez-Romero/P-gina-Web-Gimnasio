@@ -27,18 +27,23 @@ app.use(express.static('.'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/Imagenes', express.static(path.join(__dirname, 'Imagenes')));
 
-// Configuración de Multer para almacenamiento de imágenes
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'Imagenes/')
+// Configuración de Multer para almacenamiento de imágenes y PDFs
+const storage = multer.memoryStorage();
+
+const upload = multer({ 
+    storage: storage,
+    limits: {
+        fileSize: 10 * 1024 * 1024 // 10MB límite
     },
-    filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    fileFilter: function (req, file, cb) {
+        // Permitir imágenes y PDFs
+        if (file.mimetype.startsWith('image/') || file.mimetype === 'application/pdf') {
+            cb(null, true);
+        } else {
+            cb(new Error('Solo se permiten imágenes y PDFs'), false);
+        }
     }
 });
-
-const upload = multer({ storage: storage });
 
 // Función para obtener conexión a MongoDB
 async function getMongoConnection() {
@@ -624,21 +629,12 @@ app.put('/api/administradores/:id', async (req, res) => {
 // Eliminar administrador
 app.delete('/api/administradores/:id', async (req, res) => {
     try {
+        const { id } = req.params;
         const client = await getMongoConnection();
         const db = client.db();
         const usuariosCollection = db.collection('usuarios');
         
-        const { id } = req.params;
-        
-        // Buscar por id personalizado o _id de MongoDB
-        let result;
-        try {
-            const { ObjectId } = require('mongodb');
-            result = await usuariosCollection.deleteOne({ _id: new ObjectId(id) });
-        } catch (error) {
-            // Si falla la conversión, buscar por id personalizado
-            result = await usuariosCollection.deleteOne({ id: id });
-        }
+        const result = await usuariosCollection.deleteOne({ _id: new ObjectId(id) });
         
         if (result.deletedCount > 0) {
             res.json({ message: 'Administrador eliminado correctamente' });
@@ -987,6 +983,234 @@ app.get('/api/debug/membresias', async (req, res) => {
         
     } catch (error) {
         console.error('Error obteniendo debug de membresías:', error);
+        res.status(500).json({ error: 'Error interno del servidor' });
+    }
+});
+
+// ============================================================================
+// API DE INSTRUCTORES
+// ============================================================================
+
+// API para obtener todos los instructores
+app.get('/api/instructores', async (req, res) => {
+    try {
+        const client = await getMongoConnection();
+        const db = client.db();
+        const instructoresCollection = db.collection('instructores');
+        
+        const instructores = await instructoresCollection.find({}).toArray();
+        res.json(instructores);
+    } catch (error) {
+        console.error('Error obteniendo instructores:', error);
+        res.status(500).json({ error: 'Error interno del servidor' });
+    }
+});
+
+// API para obtener instructor por ID
+app.get('/api/instructores/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const client = await getMongoConnection();
+        const db = client.db();
+        const instructoresCollection = db.collection('instructores');
+        
+        const instructor = await instructoresCollection.findOne({ _id: new ObjectId(id) });
+        
+        if (instructor) {
+            res.json(instructor);
+        } else {
+            res.status(404).json({ error: 'Instructor no encontrado' });
+        }
+    } catch (error) {
+        console.error('Error obteniendo instructor:', error);
+        res.status(500).json({ error: 'Error interno del servidor' });
+    }
+});
+
+// API para crear instructor
+app.post('/api/instructores', upload.fields([
+    { name: 'foto', maxCount: 1 },
+    { name: 'contrato', maxCount: 1 }
+]), async (req, res) => {
+    try {
+        const client = await getMongoConnection();
+        const db = client.db();
+        const instructoresCollection = db.collection('instructores');
+        
+        const instructorData = {
+            nombre: req.body.nombre,
+            especialidad: req.body.especialidad,
+            email: req.body.email,
+            telefono: req.body.telefono,
+            celular: req.body.celular,
+            descripcion: req.body.descripcion || '',
+            estado: 'activo',
+            fechaContratacion: new Date(),
+            salario: req.body.salario || 2500,
+            certificaciones: req.body.certificaciones || [],
+            experiencia: req.body.experiencia || 0,
+            horarios: req.body.horarios || 'Lunes a Viernes 6:00 AM - 10:00 PM',
+            especialidadesAdicionales: req.body.especialidadesAdicionales || [],
+            notas: req.body.notas || '',
+            createdAt: new Date(),
+            updatedAt: new Date()
+        };
+        
+        // Procesar archivos subidos
+        if (req.files) {
+            if (req.files.foto) {
+                const fotoFile = req.files.foto[0];
+                instructorData.foto = {
+                    data: fotoFile.buffer,
+                    contentType: fotoFile.mimetype,
+                    filename: fotoFile.originalname
+                };
+            }
+            if (req.files.contrato) {
+                const contratoFile = req.files.contrato[0];
+                instructorData.contrato = {
+                    data: contratoFile.buffer,
+                    contentType: contratoFile.mimetype,
+                    filename: contratoFile.originalname
+                };
+            }
+        }
+        
+        const result = await instructoresCollection.insertOne(instructorData);
+        instructorData._id = result.insertedId;
+        
+        res.status(201).json(instructorData);
+    } catch (error) {
+        console.error('Error creando instructor:', error);
+        res.status(500).json({ error: 'Error interno del servidor' });
+    }
+});
+
+// API para actualizar instructor
+app.put('/api/instructores/:id', upload.fields([
+    { name: 'foto', maxCount: 1 },
+    { name: 'contrato', maxCount: 1 }
+]), async (req, res) => {
+    try {
+        const { id } = req.params;
+        const client = await getMongoConnection();
+        const db = client.db();
+        const instructoresCollection = db.collection('instructores');
+        
+        const updateData = {
+            nombre: req.body.nombre,
+            especialidad: req.body.especialidad,
+            email: req.body.email,
+            telefono: req.body.telefono,
+            celular: req.body.celular,
+            descripcion: req.body.descripcion || '',
+            salario: req.body.salario || 2500,
+            certificaciones: req.body.certificaciones || [],
+            experiencia: req.body.experiencia || 0,
+            horarios: req.body.horarios || 'Lunes a Viernes 6:00 AM - 10:00 PM',
+            especialidadesAdicionales: req.body.especialidadesAdicionales || [],
+            notas: req.body.notas || '',
+            updatedAt: new Date()
+        };
+        
+        // Procesar archivos subidos
+        if (req.files) {
+            if (req.files.foto) {
+                const fotoFile = req.files.foto[0];
+                updateData.foto = {
+                    data: fotoFile.buffer,
+                    contentType: fotoFile.mimetype,
+                    filename: fotoFile.originalname
+                };
+            }
+            if (req.files.contrato) {
+                const contratoFile = req.files.contrato[0];
+                updateData.contrato = {
+                    data: contratoFile.buffer,
+                    contentType: contratoFile.mimetype,
+                    filename: contratoFile.originalname
+                };
+            }
+        }
+        
+        const result = await instructoresCollection.updateOne(
+            { _id: new ObjectId(id) },
+            { $set: updateData }
+        );
+        
+        if (result.modifiedCount > 0) {
+            res.json({ message: 'Instructor actualizado correctamente' });
+        } else {
+            res.status(404).json({ error: 'Instructor no encontrado' });
+        }
+    } catch (error) {
+        console.error('Error actualizando instructor:', error);
+        res.status(500).json({ error: 'Error interno del servidor' });
+    }
+});
+
+// API para eliminar instructor
+app.delete('/api/instructores/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const client = await getMongoConnection();
+        const db = client.db();
+        const instructoresCollection = db.collection('instructores');
+        
+        const result = await instructoresCollection.deleteOne({ _id: new ObjectId(id) });
+        
+        if (result.deletedCount > 0) {
+            res.json({ message: 'Instructor eliminado correctamente' });
+        } else {
+            res.status(404).json({ error: 'Instructor no encontrado' });
+        }
+    } catch (error) {
+        console.error('Error eliminando instructor:', error);
+        res.status(500).json({ error: 'Error interno del servidor' });
+    }
+});
+
+// Rutas para servir archivos desde MongoDB
+app.get('/api/instructores/:id/foto', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const client = await getMongoConnection();
+        const db = client.db();
+        const instructoresCollection = db.collection('instructores');
+        
+        const instructor = await instructoresCollection.findOne({ _id: new ObjectId(id) });
+        
+        if (instructor && instructor.foto && instructor.foto.data) {
+            res.set('Content-Type', instructor.foto.contentType);
+            res.set('Content-Disposition', `inline; filename="${instructor.foto.filename}"`);
+            res.send(instructor.foto.data.buffer);
+        } else {
+            res.status(404).json({ error: 'Foto no encontrada' });
+        }
+    } catch (error) {
+        console.error('Error sirviendo foto:', error);
+        res.status(500).json({ error: 'Error interno del servidor' });
+    }
+});
+
+app.get('/api/instructores/:id/contrato', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const client = await getMongoConnection();
+        const db = client.db();
+        const instructoresCollection = db.collection('instructores');
+        
+        const instructor = await instructoresCollection.findOne({ _id: new ObjectId(id) });
+        
+        if (instructor && instructor.contrato && instructor.contrato.data) {
+            res.set('Content-Type', instructor.contrato.contentType);
+            res.set('Content-Disposition', `inline; filename="${instructor.contrato.filename}"`);
+            res.send(instructor.contrato.data.buffer);
+        } else {
+            res.status(404).json({ error: 'Contrato no encontrado' });
+        }
+    } catch (error) {
+        console.error('Error sirviendo contrato:', error);
         res.status(500).json({ error: 'Error interno del servidor' });
     }
 });

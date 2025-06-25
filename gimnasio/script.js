@@ -4,7 +4,11 @@ let clientes = [];
 let productos = [];
 let ventas = [];
 let administradores = [];
+let instructores = [];
+let currentContratoInstructor = null; // Variable para el instructor actual del contrato
 let carrito = [];
+let currentFilter = 'todos';
+let isTableView = false;
 
 // Variables para almacenar las instancias de las gráficas
 let ventasMensualesChart = null;
@@ -78,6 +82,12 @@ async function cargarDatosDesdeMongoDB() {
             administradores = await responseAdmins.json();
         }
         
+        // Cargar instructores
+        const responseInstructores = await fetch('/api/instructores');
+        if (responseInstructores.ok) {
+            instructores = await responseInstructores.json();
+        }
+        
         // Cargar ventas
         const responseVentas = await fetch('/api/ventas');
         if (responseVentas.ok) {
@@ -88,6 +98,7 @@ async function cargarDatosDesdeMongoDB() {
         console.log(`   - Clientes: ${clientes.length}`);
         console.log(`   - Productos: ${productos.length}`);
         console.log(`   - Administradores: ${administradores.length}`);
+        console.log(`   - Instructores: ${instructores.length}`);
         console.log(`   - Ventas: ${ventas.length}`);
         
     } catch (error) {
@@ -226,6 +237,70 @@ function cargarDatosEjemplo() {
         }
     ];
     
+    // Datos de ejemplo para instructores
+    instructores = [
+        {
+            _id: '1',
+            nombre: 'Carlos Rodríguez',
+            especialidad: 'gym',
+            email: 'carlos.rodriguez@gimnasio.com',
+            telefono: '555-0101',
+            celular: '555-123-4567',
+            descripcion: 'Instructor certificado en musculación y fitness con 5 años de experiencia.',
+            foto: 'Imagenes/instructor-gym.jpg',
+            contrato: 'contratos/carlos-rodriguez.pdf',
+            estado: 'activo'
+        },
+        {
+            _id: '2',
+            nombre: 'María González',
+            especialidad: 'zumba',
+            email: 'maria.gonzalez@gimnasio.com',
+            telefono: '555-0102',
+            celular: '555-234-5678',
+            descripcion: 'Instructora de Zumba certificada con especialidad en ritmos latinos.',
+            foto: 'Imagenes/instructor-zumba.jpg',
+            contrato: 'contratos/maria-gonzalez.pdf',
+            estado: 'activo'
+        },
+        {
+            _id: '3',
+            nombre: 'Roberto Silva',
+            especialidad: 'crossfit',
+            email: 'roberto.silva@gimnasio.com',
+            telefono: '555-0103',
+            celular: '555-345-6789',
+            descripcion: 'Entrenador CrossFit nivel 2 con experiencia en competiciones.',
+            foto: 'Imagenes/instructor-crossfit.jpg',
+            contrato: 'contratos/roberto-silva.pdf',
+            estado: 'activo'
+        },
+        {
+            _id: '4',
+            nombre: 'Ana Martínez',
+            especialidad: 'box',
+            email: 'ana.martinez@gimnasio.com',
+            telefono: '555-0104',
+            celular: '555-456-7890',
+            descripcion: 'Instructora de boxeo amateur con experiencia en defensa personal.',
+            foto: 'Imagenes/instructor-box.jpg',
+            contrato: 'contratos/ana-martinez.pdf',
+            estado: 'activo'
+        },
+        {
+            _id: '5',
+            nombre: 'Laura Fernández',
+            especialidad: 'danza',
+            email: 'laura.fernandez@gimnasio.com',
+            telefono: '555-0105',
+            celular: '555-567-8901',
+            descripcion: 'Bailarina profesional especializada en danza aérea y telas.',
+            foto: 'Imagenes/instructor-danza.jpg',
+            contrato: 'contratos/laura-fernandez.pdf',
+            estado: 'activo'
+        }
+    ];
+    
     // Datos de ejemplo para productos
     productos = [
         {
@@ -351,6 +426,9 @@ function showScreen(screenName) {
             break;
         case 'administradores':
             loadAdministradores();
+            break;
+        case 'instructores':
+            loadInstructores();
             break;
         case 'ventas':
             loadVentas();
@@ -577,7 +655,8 @@ async function loadDashboardChart() {
                         }
                     },
                     grid: {
-                        color: gridColor
+                        color: gridColor,
+                        lineWidth: 1
                     }
                 }
             },
@@ -2230,4 +2309,650 @@ function formatearFecha(fecha) {
         month: '2-digit',
         day: '2-digit'
     });
-} 
+}
+
+// --- FUNCIONES DE INSTRUCTORES ---
+
+// Función para cargar instructores
+function loadInstructores() {
+    renderInstructoresGrid();
+    renderInstructoresTable();
+    setupInstructoresFilters();
+    setupInstructoresSearch();
+    actualizarContadoresFiltros();
+    
+    // Restaurar filtro guardado
+    const filtroGuardado = localStorage.getItem('instructoresFilter');
+    if (filtroGuardado) {
+        filterInstructores(filtroGuardado);
+    } else {
+        filterInstructores('todos');
+    }
+}
+
+// Función para renderizar la vista de catálogo de instructores
+function renderInstructoresGrid() {
+    const grid = document.getElementById('instructoresGrid');
+    if (!grid) return;
+    
+    grid.innerHTML = '';
+    
+    instructores.forEach(instructor => {
+        const card = document.createElement('div');
+        card.className = 'instructor-card';
+        card.setAttribute('data-especialidad', instructor.especialidad);
+        
+        const especialidadText = getEspecialidadText(instructor.especialidad);
+        const especialidadIcon = getEspecialidadIcon(instructor.especialidad);
+        
+        // Determinar URL de la foto
+        let fotoUrl = 'Imagenes/Logo2.png'; // Usar el logo como imagen por defecto
+        if (instructor.foto) {
+            if (instructor.foto.data) {
+                // Si es un archivo guardado en MongoDB
+                fotoUrl = `/api/instructores/${instructor._id}/foto`;
+            } else if (typeof instructor.foto === 'string') {
+                // Si es una URL de archivo (compatibilidad con datos existentes)
+                fotoUrl = instructor.foto;
+            }
+        }
+        
+        card.innerHTML = `
+            <div class="instructor-header">
+                <img src="${fotoUrl}" 
+                     alt="${instructor.nombre}" 
+                     class="instructor-foto"
+                     onerror="this.src='Imagenes/Logo2.png'">
+                <div class="instructor-info">
+                    <h3>${instructor.nombre}</h3>
+                    <span class="instructor-especialidad">
+                        <i class="${especialidadIcon}"></i> ${especialidadText}
+                    </span>
+                </div>
+            </div>
+            <div class="instructor-contacto">
+                <div class="contacto-item">
+                    <i class="fas fa-phone"></i>
+                    <span>${instructor.telefono}</span>
+                </div>
+                <div class="contacto-item">
+                    <i class="fas fa-mobile-alt"></i>
+                    <span>${instructor.celular}</span>
+                </div>
+                <div class="contacto-item">
+                    <i class="fas fa-envelope"></i>
+                    <span>${instructor.email}</span>
+                </div>
+            </div>
+            <div class="instructor-descripcion">
+                ${instructor.descripcion || 'Sin descripción disponible.'}
+            </div>
+            <div class="instructor-actions">
+                ${instructor.contrato ? 
+                    `<button class="instructor-btn ver-contrato" onclick="verContrato('${instructor._id}')" title="Ver Contrato">
+                        <i class="fas fa-file-contract"></i> Contrato
+                    </button>` : ''
+                }
+                <button class="instructor-btn editar" onclick="editInstructor('${instructor._id}')" title="Editar">
+                    <i class="fas fa-edit"></i> Editar
+                </button>
+                <button class="instructor-btn eliminar" onclick="deleteInstructor('${instructor._id}')" title="Eliminar">
+                    <i class="fas fa-trash"></i> Eliminar
+                </button>
+            </div>
+        `;
+        
+        grid.appendChild(card);
+    });
+}
+
+// Función para renderizar la tabla de instructores
+function renderInstructoresTable() {
+    const tbody = document.getElementById('instructoresTableBody');
+    if (!tbody) return;
+    
+    tbody.innerHTML = '';
+    
+    instructores.forEach(instructor => {
+        const row = document.createElement('tr');
+        
+        // Determinar URL de la foto
+        let fotoUrl = 'Imagenes/default-instructor.jpg';
+        if (instructor.foto) {
+            if (instructor.foto.data) {
+                // Si es un archivo guardado en MongoDB
+                fotoUrl = `/api/instructores/${instructor._id}/foto`;
+            } else if (typeof instructor.foto === 'string') {
+                // Si es una URL de archivo (compatibilidad con datos existentes)
+                fotoUrl = instructor.foto;
+            }
+        }
+        
+        row.innerHTML = `
+            <td>${instructor._id}</td>
+            <td>
+                <img src="${fotoUrl}" 
+                     alt="${instructor.nombre}" 
+                     class="producto-imagen-tabla"
+                     onerror="this.src='Imagenes/Logo2.png'">
+            </td>
+            <td>${instructor.nombre}</td>
+            <td><span class="badge badge-primary">${getEspecialidadText(instructor.especialidad)}</span></td>
+            <td>${instructor.telefono}</td>
+            <td>${instructor.celular}</td>
+            <td>${instructor.email}</td>
+            <td><span class="badge badge-success">${instructor.estado || 'Activo'}</span></td>
+            <td>
+                <div class="action-buttons">
+                    ${instructor.contrato ? 
+                        `<button class="btn-edit" onclick="verContrato('${instructor._id}')" title="Ver Contrato">
+                            <i class="fas fa-file-contract"></i>
+                        </button>` : ''
+                    }
+                    <button class="btn-edit" onclick="editInstructor('${instructor._id}')" title="Editar">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn-delete" onclick="deleteInstructor('${instructor._id}')" title="Eliminar">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </td>
+        `;
+        
+        tbody.appendChild(row);
+    });
+}
+
+// Función para configurar filtros de instructores
+function setupInstructoresFilters() {
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    
+    filterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const filter = this.getAttribute('data-filter');
+            filterInstructores(filter);
+            
+            // Limpiar búsqueda cuando se cambia de filtro
+            const searchInput = document.getElementById('searchInstructor');
+            if (searchInput) {
+                searchInput.value = '';
+            }
+        });
+    });
+}
+
+// Función para filtrar instructores
+function filterInstructores(filter) {
+    const cards = document.querySelectorAll('.instructor-card');
+    const tbody = document.getElementById('instructoresTableBody');
+    
+    // Filtrar tarjetas
+    cards.forEach(card => {
+        if (filter === 'todos') {
+            card.style.display = 'block';
+        } else {
+            const especialidad = card.getAttribute('data-especialidad');
+            if (especialidad === filter) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        }
+    });
+    
+    // Filtrar tabla si está visible
+    if (tbody) {
+        const rows = tbody.querySelectorAll('tr');
+        rows.forEach(row => {
+            const especialidadCell = row.querySelector('td:nth-child(4)');
+            if (especialidadCell) {
+                const especialidadText = especialidadCell.textContent.toLowerCase();
+                if (filter === 'todos') {
+                    row.style.display = '';
+                } else {
+                    const filterText = getEspecialidadText(filter).toLowerCase();
+                    if (especialidadText.includes(filterText)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                }
+            }
+        });
+    }
+    
+    // Actualizar botones activos
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    document.querySelector(`[data-filter="${filter}"]`).classList.add('active');
+    
+    // Guardar filtro actual en localStorage
+    localStorage.setItem('instructoresFilter', filter);
+}
+
+// Función para aplicar filtro automáticamente después de agregar/editar instructor
+function aplicarFiltroAutomatico(especialidad) {
+    if (especialidad && especialidad !== '') {
+        filterInstructores(especialidad);
+        
+        // Mostrar mensaje informativo
+        const especialidadText = getEspecialidadText(especialidad);
+        showModalMessage(`Instructor agregado a la categoría: ${especialidadText}`, 'success');
+    } else {
+        filterInstructores('todos');
+    }
+}
+
+// Función para cambiar entre vista de catálogo y tabla
+function toggleInstructoresView() {
+    const grid = document.getElementById('instructoresGrid');
+    const tableContainer = document.getElementById('instructoresTableContainer');
+    const toggleText = document.getElementById('viewToggleText');
+    
+    if (grid.style.display === 'none') {
+        grid.style.display = 'grid';
+        tableContainer.style.display = 'none';
+        toggleText.textContent = 'Vista Tabla';
+    } else {
+        grid.style.display = 'none';
+        tableContainer.style.display = 'block';
+        toggleText.textContent = 'Vista Catálogo';
+    }
+}
+
+// Función para mostrar formulario de instructor
+function showInstructorForm(instructor = null) {
+    const modal = document.getElementById('instructorModal');
+    const title = document.getElementById('instructorModalTitle');
+    const form = document.getElementById('instructorForm');
+    
+    if (instructor) {
+        title.textContent = 'Editar Instructor';
+        document.getElementById('instructorId').value = instructor._id || '';
+        document.getElementById('instructorNombre').value = instructor.nombre || '';
+        document.getElementById('instructorEmail').value = instructor.email || '';
+        document.getElementById('instructorTelefono').value = instructor.telefono || '';
+        document.getElementById('instructorCelular').value = instructor.celular || '';
+        document.getElementById('instructorDescripcion').value = instructor.descripcion || '';
+        
+        // Nuevos campos
+        document.getElementById('instructorSalario').value = instructor.salario || 2500;
+        document.getElementById('instructorExperiencia').value = instructor.experiencia || 0;
+        document.getElementById('instructorHorarios').value = instructor.horarios || 'Lunes a Viernes 6:00 AM - 10:00 PM';
+        document.getElementById('instructorCertificaciones').value = instructor.certificaciones || '';
+        document.getElementById('instructorEspecialidadesAdicionales').value = instructor.especialidadesAdicionales || '';
+        document.getElementById('instructorNotas').value = instructor.notas || '';
+    } else {
+        title.textContent = 'Nuevo Instructor';
+        form.reset();
+        
+        // Establecer valores por defecto para nuevos campos
+        document.getElementById('instructorSalario').value = 2500;
+        document.getElementById('instructorExperiencia').value = 0;
+        document.getElementById('instructorHorarios').value = 'Lunes a Viernes 6:00 AM - 10:00 PM';
+        document.getElementById('instructorCertificaciones').value = '';
+        document.getElementById('instructorEspecialidadesAdicionales').value = '';
+        document.getElementById('instructorNotas').value = '';
+        
+        // Generar ID temporal para nuevo instructor
+        const tempId = 'TEMP_' + Date.now();
+        document.getElementById('instructorId').value = tempId;
+    }
+    
+    modal.style.display = 'block';
+}
+
+// Función para cerrar modal de instructor
+function closeInstructorModal() {
+    document.getElementById('instructorModal').style.display = 'none';
+}
+
+// Función para editar instructor
+function editInstructor(id) {
+    const instructor = instructores.find(i => i._id === id);
+    if (instructor) {
+        showInstructorForm(instructor);
+    } else {
+        console.error('❌ Instructor no encontrado con ID:', id);
+        mostrarMensaje('Instructor no encontrado', 'error');
+    }
+}
+
+// Función para eliminar instructor
+async function deleteInstructor(id) {
+    if (confirm('¿Está seguro de que desea eliminar este instructor?')) {
+        try {
+            const response = await fetch(`/api/instructores/${id}`, {
+                method: 'DELETE'
+            });
+            
+            if (response.ok) {
+                instructores = instructores.filter(i => i._id !== id);
+                renderInstructoresGrid();
+                renderInstructoresTable();
+                mostrarMensaje('Instructor eliminado correctamente', 'success');
+            } else {
+                mostrarMensaje('Error al eliminar instructor', 'error');
+            }
+        } catch (error) {
+            console.error('Error eliminando instructor:', error);
+            mostrarMensaje('Error de conexión', 'error');
+        }
+    }
+}
+
+// Función para ver contrato
+function verContrato(instructorId) {
+    const instructor = instructores.find(i => i._id === instructorId);
+    if (!instructor || !instructor.contrato) {
+        showAlert('No hay contrato disponible para este instructor', 'warning');
+        return;
+    }
+    
+    // Determinar URL del contrato
+    let contratoUrl;
+    if (instructor.contrato.data) {
+        // Si es un archivo guardado en MongoDB
+        contratoUrl = `/api/instructores/${instructorId}/contrato`;
+    } else if (typeof instructor.contrato === 'string') {
+        // Si es una URL de archivo (compatibilidad con datos existentes)
+        contratoUrl = instructor.contrato;
+    } else {
+        showAlert('Formato de contrato no válido', 'error');
+        return;
+    }
+    
+    const iframe = document.getElementById('contratoIframe');
+    if (iframe) {
+        iframe.src = contratoUrl;
+    }
+    
+    const modal = document.getElementById('contratoModal');
+    if (modal) {
+        modal.style.display = 'block';
+        currentContratoInstructor = instructorId;
+    }
+}
+
+// Función para cerrar modal de contrato
+function closeContratoModal() {
+    document.getElementById('contratoModal').style.display = 'none';
+    document.getElementById('contratoIframe').src = 'about:blank';
+}
+
+// Función para descargar contrato
+function downloadContrato() {
+    if (!currentContratoInstructor) {
+        showAlert('No hay contrato seleccionado para descargar', 'warning');
+        return;
+    }
+    
+    const instructor = instructores.find(i => i._id === currentContratoInstructor);
+    if (!instructor || !instructor.contrato) {
+        showAlert('No hay contrato disponible para descargar', 'warning');
+        return;
+    }
+    
+    // Crear URL para descarga
+    const downloadUrl = `/api/instructores/${currentContratoInstructor}/contrato`;
+    
+    // Crear elemento de descarga
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = instructor.contrato.filename || 'contrato.pdf';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    showAlert('Descarga iniciada', 'success');
+}
+
+// Función para obtener texto de especialidad
+function getEspecialidadText(especialidad) {
+    const especialidades = {
+        'gym': 'Gym',
+        'zumba': 'Zumba',
+        'crossfit': 'CrossFit',
+        'box': 'Box',
+        'danza': 'Danza en Telas'
+    };
+    return especialidades[especialidad] || especialidad;
+}
+
+// Función para obtener icono de especialidad
+function getEspecialidadIcon(especialidad) {
+    const iconos = {
+        'gym': 'fas fa-dumbbell',
+        'zumba': 'fas fa-music',
+        'crossfit': 'fas fa-fire',
+        'box': 'fas fa-fist-raised',
+        'danza': 'fas fa-ballet'
+    };
+    return iconos[especialidad] || 'fas fa-user';
+}
+
+// Event listener para el formulario de instructor
+document.addEventListener('DOMContentLoaded', function() {
+    const instructorForm = document.getElementById('instructorForm');
+    if (instructorForm) {
+        instructorForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Mostrar indicador de carga
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+            submitBtn.disabled = true;
+            
+            const instructorId = document.getElementById('instructorId').value;
+            const formData = new FormData();
+            
+            formData.append('nombre', document.getElementById('instructorNombre').value);
+            formData.append('especialidad', document.getElementById('instructorEspecialidad').value);
+            formData.append('email', document.getElementById('instructorEmail').value);
+            formData.append('telefono', document.getElementById('instructorTelefono').value);
+            formData.append('celular', document.getElementById('instructorCelular').value);
+            formData.append('descripcion', document.getElementById('instructorDescripcion').value);
+            
+            // Nuevos campos
+            formData.append('salario', document.getElementById('instructorSalario').value || 2500);
+            formData.append('experiencia', document.getElementById('instructorExperiencia').value || 0);
+            formData.append('horarios', document.getElementById('instructorHorarios').value || 'Lunes a Viernes 6:00 AM - 10:00 PM');
+            formData.append('certificaciones', document.getElementById('instructorCertificaciones').value || '');
+            formData.append('especialidadesAdicionales', document.getElementById('instructorEspecialidadesAdicionales').value || '');
+            formData.append('notas', document.getElementById('instructorNotas').value || '');
+            
+            // Adjuntar archivos si se seleccionaron
+            const fotoInput = document.getElementById('instructorFoto');
+            const contratoInput = document.getElementById('instructorContrato');
+            
+            if (fotoInput.files.length > 0) {
+                formData.append('foto', fotoInput.files[0]);
+            }
+            if (contratoInput.files.length > 0) {
+                formData.append('contrato', contratoInput.files[0]);
+            }
+            
+            try {
+                let response;
+                const isUpdate = instructorId && !instructorId.startsWith('TEMP_');
+                
+                const url = isUpdate ? `/api/instructores/${instructorId}` : '/api/instructores';
+                const method = isUpdate ? 'PUT' : 'POST';
+                
+                console.log('Enviando solicitud a:', url, 'con método:', method);
+                
+                response = await fetch(url, {
+                    method: method,
+                    body: formData
+                });
+                
+                console.log('Respuesta recibida:', response.status, response.statusText);
+                
+                if (response.ok) {
+                    const successMessage = isUpdate ? 'Instructor actualizado correctamente' : 'Instructor agregado correctamente';
+                    
+                    // Obtener la especialidad del instructor agregado/editado
+                    const especialidadInstructor = document.getElementById('instructorEspecialidad').value;
+                    
+                    // Cerrar el modal inmediatamente
+                    closeInstructorModal();
+                    
+                    // Mostrar mensaje de éxito
+                    showModalMessage(successMessage, 'success');
+                    
+                    // Recargar datos desde el servidor
+                    await cargarDatosDesdeMongoDB();
+                    
+                    // Actualizar vistas
+                    renderInstructoresGrid();
+                    renderInstructoresTable();
+                    actualizarContadoresFiltros();
+                    
+                    // Aplicar filtro automático según la especialidad del instructor
+                    aplicarFiltroAutomatico(especialidadInstructor);
+                    
+                    // Limpiar el formulario
+                    instructorForm.reset();
+                    
+                } else {
+                    let errorMessage = 'Error al procesar instructor';
+                    try {
+                        const errorData = await response.json();
+                        errorMessage = errorData.error || errorMessage;
+                    } catch (parseError) {
+                        console.error('Error parseando respuesta de error:', parseError);
+                        errorMessage = `Error ${response.status}: ${response.statusText}`;
+                    }
+                    showModalMessage(errorMessage, 'error');
+                }
+            } catch (error) {
+                console.error('❌ Error procesando instructor:', error);
+                showModalMessage('Error de conexión: ' + error.message, 'error');
+            } finally {
+                // Restaurar el botón
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+    }
+});
+
+// Función para mostrar mensajes en el modal
+function showModalMessage(message, type = 'success') {
+    // Remover mensajes existentes
+    const existingMessage = document.querySelector('.modal-message');
+    if (existingMessage) {
+        existingMessage.remove();
+    }
+    
+    // Crear nuevo mensaje
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `modal-message ${type}`;
+    messageDiv.innerHTML = `
+        <div style="text-align: center;">
+            <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}" 
+               style="font-size: 2rem; color: ${type === 'success' ? '#28a745' : '#ff3a57'}; margin-bottom: 15px;"></i>
+            <p style="color: var(--text-color); font-size: 1.1rem; margin: 0;">${message}</p>
+        </div>
+    `;
+    
+    document.body.appendChild(messageDiv);
+    
+    // Remover mensaje después de 3 segundos
+    setTimeout(() => {
+        if (messageDiv.parentNode) {
+            messageDiv.remove();
+        }
+    }, 3000);
+}
+
+// Función para cerrar modal de instructor mejorada
+function closeInstructorModal() {
+    const modal = document.getElementById('instructorModal');
+    const form = document.getElementById('instructorForm');
+    
+    // Limpiar el formulario
+    if (form) {
+        form.reset();
+    }
+    
+    // Limpiar campos específicos
+    const idField = document.getElementById('instructorId');
+    if (idField) {
+        idField.value = '';
+    }
+    
+    // Ocultar el modal con animación
+    modal.style.display = 'none';
+    
+    // Remover mensajes de error/éxito que puedan estar mostrándose
+    const existingMessage = document.querySelector('.modal-message');
+    if (existingMessage) {
+        existingMessage.remove();
+    }
+}
+
+// Función para configurar búsqueda de instructores
+function setupInstructoresSearch() {
+    const searchInput = document.getElementById('searchInstructor');
+    if (!searchInput) return;
+    
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        const cards = document.querySelectorAll('.instructor-card');
+        const tbody = document.getElementById('instructoresTableBody');
+        
+        // Filtrar tarjetas
+        cards.forEach(card => {
+            const text = card.textContent.toLowerCase();
+            if (text.includes(searchTerm)) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+        
+        // Filtrar tabla si está visible
+        if (tbody) {
+            const rows = tbody.querySelectorAll('tr');
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+        
+        // Si hay término de búsqueda, mostrar todos los resultados que coincidan
+        // Si no hay término, restaurar el filtro anterior
+        if (searchTerm === '') {
+            const filtroAnterior = localStorage.getItem('instructoresFilter') || 'todos';
+            filterInstructores(filtroAnterior);
+        }
+    });
+}
+
+// Función para actualizar contadores en los filtros
+function actualizarContadoresFiltros() {
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    
+    filterButtons.forEach(button => {
+        const filter = button.getAttribute('data-filter');
+        let count = 0;
+        
+        if (filter === 'todos') {
+            count = instructores.length;
+        } else {
+            count = instructores.filter(instructor => instructor.especialidad === filter).length;
+        }
+        
+        // Actualizar el texto del botón con el contador
+        const icon = button.querySelector('i');
+        const originalText = button.textContent.replace(/\d+$/, '').trim();
+        button.innerHTML = `${icon.outerHTML} ${originalText} <span class="filter-count">(${count})</span>`;
+    });
+}

@@ -52,6 +52,9 @@
                 <button class="nav-btn" onclick="showScreen('historial')">
                     <i class="fas fa-history"></i> Historial
                 </button>
+                <button class="nav-btn" onclick="showScreen('instructores')">
+                    <i class="fas fa-dumbbell"></i> Instructores
+                </button>
                 <button class="nav-btn" onclick="showScreen('ventas')">
                     <i class="fas fa-shopping-cart"></i> Ventas
                 </button>
@@ -130,6 +133,9 @@
                 </button>
                 <button class="nav-btn" onclick="showScreen('historial')">
                     <i class="fas fa-history"></i> Historial
+                </button>
+                <button class="nav-btn" onclick="showScreen('instructores')">
+                    <i class="fas fa-dumbbell"></i> Instructores
                 </button>
                 <button class="nav-btn" onclick="showScreen('ventas')">
                     <i class="fas fa-shopping-cart"></i> Ventas
@@ -264,6 +270,9 @@
                 <button class="nav-btn active" onclick="showScreen('historial')">
                     <i class="fas fa-history"></i> Historial
                 </button>
+                <button class="nav-btn" onclick="showScreen('instructores')">
+                    <i class="fas fa-dumbbell"></i> Instructores
+                </button>
                 <button class="nav-btn" onclick="showScreen('ventas')">
                     <i class="fas fa-shopping-cart"></i> Ventas
                 </button>
@@ -343,6 +352,227 @@
         </div>
     </div>
 
+    <!-- Instructores Screen -->
+    <div id="instructoresScreen" class="screen">
+        <nav class="navbar">
+            <div class="nav-brand">
+                <img src="Imagenes/Logo2.png" alt="Logo" class="nav-logo">
+                <span>Gimnasio</span>
+            </div>
+            <div class="nav-menu">
+                <button class="nav-btn" onclick="showScreen('dashboard')">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </button>
+                <button class="nav-btn" onclick="showScreen('clientes')">
+                    <i class="fas fa-users"></i> Clientes
+                </button>
+                <button class="nav-btn" onclick="showScreen('historial')">
+                    <i class="fas fa-history"></i> Historial
+                </button>
+                <button class="nav-btn active" onclick="showScreen('instructores')">
+                    <i class="fas fa-dumbbell"></i> Instructores
+                </button>
+                <button class="nav-btn" onclick="showScreen('ventas')">
+                    <i class="fas fa-shopping-cart"></i> Ventas
+                </button>
+                <button class="nav-btn" onclick="showScreen('productos')">
+                    <i class="fas fa-box"></i> Productos
+                </button>
+                <button class="nav-btn" onclick="showScreen('administradores')">
+                    <i class="fas fa-user-shield"></i> Administradores
+                </button>
+                <button class="nav-btn" onclick="showScreen('reportes')">
+                    <i class="fas fa-chart-bar"></i> Reportes
+                </button>
+                <button class="nav-btn" onclick="showScreen('configuracion')">
+                    <i class="fas fa-cog"></i> Configuración
+                </button>
+                <button class="nav-btn logout-btn" onclick="showScreen('salir')">
+                    <i class="fas fa-sign-out-alt"></i> Salir
+                </button>
+            </div>
+        </nav>
+
+        <div class="content">
+            <div class="content-header">
+                <h1>Gestión de Instructores</h1>
+                <button class="btn-primary" onclick="showInstructorForm()">
+                    <i class="fas fa-plus"></i> Nuevo Instructor
+                </button>
+            </div>
+
+            <!-- Filtros por categoría -->
+            <div class="filters-container">
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-filter="todos">
+                        <i class="fas fa-th"></i> Todos
+                    </button>
+                    <button class="filter-btn" data-filter="gym">
+                        <i class="fas fa-dumbbell"></i> Gym
+                    </button>
+                    <button class="filter-btn" data-filter="zumba">
+                        <i class="fas fa-music"></i> Zumba
+                    </button>
+                    <button class="filter-btn" data-filter="crossfit">
+                        <i class="fas fa-fire"></i> CrossFit
+                    </button>
+                    <button class="filter-btn" data-filter="box">
+                        <i class="fas fa-fist-raised"></i> Box
+                    </button>
+                    <button class="filter-btn" data-filter="danza">
+                        <i class="fas fa-ballet"></i> Danza en Telas
+                    </button>
+                </div>
+            </div>
+
+            <div class="search-container">
+                <input type="text" id="searchInstructor" placeholder="Buscar instructor..." class="search-input">
+                <i class="fas fa-search search-icon"></i>
+            </div>
+
+            <!-- Vista de catálogo -->
+            <div class="instructores-grid" id="instructoresGrid">
+                <!-- Los instructores se cargarán dinámicamente -->
+            </div>
+
+            <!-- Vista de tabla (alternativa) -->
+            <div class="table-container" id="instructoresTableContainer" style="display: none;">
+                <table id="instructoresTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Foto</th>
+                            <th>Nombre</th>
+                            <th>Especialidad</th>
+                            <th>Teléfono</th>
+                            <th>Celular</th>
+                            <th>Email</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="instructoresTableBody">
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Botón para cambiar vista -->
+            <div class="view-toggle">
+                <button class="btn-secondary" onclick="toggleInstructoresView()">
+                    <i class="fas fa-th"></i> <span id="viewToggleText">Vista Tabla</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Modal para agregar/editar instructor -->
+        <div id="instructorModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeInstructorModal()">&times;</span>
+                <h2 id="instructorModalTitle">Nuevo Instructor</h2>
+                <form id="instructorForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="instructorId">ID:</label>
+                            <input type="text" id="instructorId" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="instructorNombre">Nombre Completo:</label>
+                            <input type="text" id="instructorNombre" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="instructorEspecialidad">Especialidad:</label>
+                            <select id="instructorEspecialidad" required>
+                                <option value="">Seleccionar...</option>
+                                <option value="gym">Gym</option>
+                                <option value="zumba">Zumba</option>
+                                <option value="crossfit">CrossFit</option>
+                                <option value="box">Box</option>
+                                <option value="danza">Danza en Telas</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="instructorEmail">Email:</label>
+                            <input type="email" id="instructorEmail" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="instructorTelefono">Teléfono:</label>
+                            <input type="tel" id="instructorTelefono" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="instructorCelular">Celular:</label>
+                            <input type="tel" id="instructorCelular" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="instructorSalario">Salario (USD):</label>
+                            <input type="number" id="instructorSalario" min="0" step="100" value="2500">
+                        </div>
+                        <div class="form-group">
+                            <label for="instructorExperiencia">Años de Experiencia:</label>
+                            <input type="number" id="instructorExperiencia" min="0" max="50" value="0">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="instructorHorarios">Horarios de Trabajo:</label>
+                            <input type="text" id="instructorHorarios" value="Lunes a Viernes 6:00 AM - 10:00 PM" placeholder="Ej: Lunes a Viernes 6:00 AM - 10:00 PM">
+                        </div>
+                        <div class="form-group">
+                            <label for="instructorCertificaciones">Certificaciones:</label>
+                            <input type="text" id="instructorCertificaciones" placeholder="Ej: Personal Trainer, Zumba Instructor, CrossFit Level 1">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="instructorEspecialidadesAdicionales">Especialidades Adicionales:</label>
+                        <input type="text" id="instructorEspecialidadesAdicionales" placeholder="Ej: Yoga, Pilates, Spinning">
+                    </div>
+                    <div class="form-group">
+                        <label for="instructorNotas">Notas Adicionales:</label>
+                        <textarea id="instructorNotas" rows="2" placeholder="Información adicional sobre el instructor..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="instructorFoto">Foto del Instructor:</label>
+                        <input type="file" id="instructorFoto" accept="image/*">
+                    </div>
+                    <div class="form-group">
+                        <label for="instructorContrato">Contrato (PDF):</label>
+                        <input type="file" id="instructorContrato" accept=".pdf,.doc,.docx">
+                    </div>
+                    <div class="form-group">
+                        <label for="instructorDescripcion">Descripción:</label>
+                        <textarea id="instructorDescripcion" rows="3" placeholder="Breve descripción del instructor y su experiencia..."></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" onclick="closeInstructorModal()">Cancelar</button>
+                        <button type="submit" class="btn-primary">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Modal para ver contrato -->
+        <div id="contratoModal" class="modal">
+            <div class="modal-content modal-large">
+                <span class="close" onclick="closeContratoModal()">&times;</span>
+                <h2>Contrato del Instructor</h2>
+                <div class="contrato-viewer">
+                    <iframe id="contratoIframe" src="" width="100%" height="600px"></iframe>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-secondary" onclick="closeContratoModal()">Cerrar</button>
+                    <button class="btn-primary" onclick="downloadContrato()">
+                        <i class="fas fa-download"></i> Descargar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Ventas Screen -->
     <div id="ventasScreen" class="screen">
         <nav class="navbar">
@@ -359,6 +589,9 @@
                 </button>
                 <button class="nav-btn" onclick="showScreen('historial')">
                     <i class="fas fa-history"></i> Historial
+                </button>
+                <button class="nav-btn" onclick="showScreen('instructores')">
+                    <i class="fas fa-dumbbell"></i> Instructores
                 </button>
                 <button class="nav-btn active" onclick="showScreen('ventas')">
                     <i class="fas fa-shopping-cart"></i> Ventas
@@ -422,10 +655,13 @@
                 <button class="nav-btn" onclick="showScreen('historial')">
                     <i class="fas fa-history"></i> Historial
                 </button>
-                <button class="nav-btn" onclick="showScreen('ventas')">
+                <button class="nav-btn" onclick="showScreen('instructores')">
+                    <i class="fas fa-dumbbell"></i> Instructores
+                </button>
+                <button class="nav-btn active" onclick="showScreen('ventas')">
                     <i class="fas fa-shopping-cart"></i> Ventas
                 </button>
-                <button class="nav-btn active" onclick="showScreen('productos')">
+                <button class="nav-btn" onclick="showScreen('productos')">
                     <i class="fas fa-box"></i> Productos
                 </button>
                 <button class="nav-btn" onclick="showScreen('administradores')">
@@ -530,13 +766,16 @@
                 <button class="nav-btn" onclick="showScreen('historial')">
                     <i class="fas fa-history"></i> Historial
                 </button>
-                <button class="nav-btn" onclick="showScreen('ventas')">
+                <button class="nav-btn" onclick="showScreen('instructores')">
+                    <i class="fas fa-dumbbell"></i> Instructores
+                </button>
+                <button class="nav-btn active" onclick="showScreen('ventas')">
                     <i class="fas fa-shopping-cart"></i> Ventas
                 </button>
                 <button class="nav-btn" onclick="showScreen('productos')">
                     <i class="fas fa-box"></i> Productos
                 </button>
-                <button class="nav-btn active" onclick="showScreen('administradores')">
+                <button class="nav-btn" onclick="showScreen('administradores')">
                     <i class="fas fa-user-shield"></i> Administradores
                 </button>
                 <button class="nav-btn" onclick="showScreen('reportes')">
@@ -641,7 +880,10 @@
                 <button class="nav-btn" onclick="showScreen('historial')">
                     <i class="fas fa-history"></i> Historial
                 </button>
-                <button class="nav-btn" onclick="showScreen('ventas')">
+                <button class="nav-btn" onclick="showScreen('instructores')">
+                    <i class="fas fa-dumbbell"></i> Instructores
+                </button>
+                <button class="nav-btn active" onclick="showScreen('ventas')">
                     <i class="fas fa-shopping-cart"></i> Ventas
                 </button>
                 <button class="nav-btn" onclick="showScreen('productos')">
@@ -650,7 +892,7 @@
                 <button class="nav-btn" onclick="showScreen('administradores')">
                     <i class="fas fa-user-shield"></i> Administradores
                 </button>
-                <button class="nav-btn active" onclick="showScreen('reportes')">
+                <button class="nav-btn" onclick="showScreen('reportes')">
                     <i class="fas fa-chart-bar"></i> Reportes
                 </button>
                 <button class="nav-btn" onclick="showScreen('configuracion')">
@@ -728,7 +970,10 @@
                 <button class="nav-btn" onclick="showScreen('historial')">
                     <i class="fas fa-history"></i> Historial
                 </button>
-                <button class="nav-btn" onclick="showScreen('ventas')">
+                <button class="nav-btn" onclick="showScreen('instructores')">
+                    <i class="fas fa-dumbbell"></i> Instructores
+                </button>
+                <button class="nav-btn active" onclick="showScreen('ventas')">
                     <i class="fas fa-shopping-cart"></i> Ventas
                 </button>
                 <button class="nav-btn" onclick="showScreen('productos')">
@@ -740,7 +985,7 @@
                 <button class="nav-btn" onclick="showScreen('reportes')">
                     <i class="fas fa-chart-bar"></i> Reportes
                 </button>
-                <button class="nav-btn active" onclick="showScreen('configuracion')">
+                <button class="nav-btn" onclick="showScreen('configuracion')">
                     <i class="fas fa-cog"></i> Configuración
                 </button>
                 <button class="nav-btn logout-btn" onclick="showScreen('salir')">

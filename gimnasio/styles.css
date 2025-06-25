@@ -1770,4 +1770,739 @@ body.animations-disabled *::after {
     #historialTable td {
         padding: 8px 6px;
     }
-} 
+}
+
+/* --- INSTRUCTORES --- */
+.filters-container {
+    margin-bottom: 30px;
+    background: var(--glass-bg);
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+}
+
+.filter-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+}
+
+.filter-btn {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--glass-border);
+    color: var(--text-color);
+    padding: 12px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    backdrop-filter: blur(5px);
+}
+
+.filter-btn:hover {
+    background: var(--glass-bg);
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(159, 47, 255, 0.3);
+}
+
+.filter-btn.active {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    border-color: var(--primary-color);
+    color: white;
+    box-shadow: 0 0 15px var(--primary-color);
+}
+
+.filter-btn i {
+    font-size: 1.1rem;
+}
+
+.instructores-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 25px;
+    margin-bottom: 30px;
+}
+
+.instructor-card {
+    background: var(--glass-bg);
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.instructor-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+}
+
+.instructor-card:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 0 25px var(--glow-color);
+    border-color: var(--primary-color);
+}
+
+.instructor-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.instructor-foto {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--primary-color);
+    box-shadow: 0 0 15px var(--primary-color);
+}
+
+.instructor-info h3 {
+    color: var(--text-color);
+    font-size: 1.3rem;
+    margin-bottom: 5px;
+    text-shadow: 0 0 5px var(--primary-color);
+}
+
+.instructor-especialidad {
+    background: linear-gradient(135deg, var(--accent-color), #20c997);
+    color: #212529;
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-block;
+}
+
+.instructor-contacto {
+    margin-bottom: 15px;
+}
+
+.contacto-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    color: var(--text-color);
+    font-size: 0.9rem;
+}
+
+.contacto-item i {
+    color: var(--secondary-color);
+    width: 16px;
+    text-align: center;
+}
+
+.instructor-descripcion {
+    color: #ccc;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    margin-bottom: 20px;
+    font-style: italic;
+}
+
+.instructor-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.instructor-btn {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.instructor-btn.ver-contrato {
+    background: var(--primary-color);
+    color: white;
+}
+
+.instructor-btn.ver-contrato:hover {
+    background: #8a2be2;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(159, 47, 255, 0.4);
+}
+
+.instructor-btn.editar {
+    background: var(--accent-color);
+    color: #212529;
+}
+
+.instructor-btn.editar:hover {
+    background: #c4d600;
+    transform: translateY(-2px);
+}
+
+.instructor-btn.eliminar {
+    background: var(--danger-color);
+    color: white;
+}
+
+.instructor-btn.eliminar:hover {
+    background: #ff5e78;
+    transform: translateY(-2px);
+}
+
+.view-toggle {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.modal-large {
+    max-width: 90%;
+    width: 90%;
+    max-height: 90vh;
+}
+
+.contrato-viewer {
+    background: #f8f9fa;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+/* Especialidades con colores específicos */
+.instructor-card[data-especialidad="gym"]::before {
+    background: linear-gradient(90deg, #ff6b6b, #ee5a24);
+}
+
+.instructor-card[data-especialidad="zumba"]::before {
+    background: linear-gradient(90deg, #ff9ff3, #f368e0);
+}
+
+.instructor-card[data-especialidad="crossfit"]::before {
+    background: linear-gradient(90deg, #ff9f43, #f39c12);
+}
+
+.instructor-card[data-especialidad="box"]::before {
+    background: linear-gradient(90deg, #ee5a24, #d63031);
+}
+
+.instructor-card[data-especialidad="danza"]::before {
+    background: linear-gradient(90deg, #a29bfe, #6c5ce7);
+}
+
+/* Responsive para instructores */
+@media (max-width: 768px) {
+    .filter-buttons {
+        gap: 10px;
+    }
+    
+    .filter-btn {
+        padding: 10px 15px;
+        font-size: 0.8rem;
+    }
+    
+    .instructores-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .instructor-card {
+        padding: 20px;
+    }
+    
+    .instructor-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .instructor-foto {
+        width: 70px;
+        height: 70px;
+    }
+    
+    .instructor-actions {
+        flex-direction: column;
+    }
+    
+    .modal-large {
+        max-width: 95%;
+        width: 95%;
+    }
+}
+
+/* Animaciones para instructores */
+@keyframes fadeInInstructor {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.instructor-card {
+    animation: fadeInInstructor 0.5s ease-out;
+}
+
+.instructor-card:nth-child(1) { animation-delay: 0.1s; }
+.instructor-card:nth-child(2) { animation-delay: 0.2s; }
+.instructor-card:nth-child(3) { animation-delay: 0.3s; }
+.instructor-card:nth-child(4) { animation-delay: 0.4s; }
+.instructor-card:nth-child(5) { animation-delay: 0.5s; }
+.instructor-card:nth-child(6) { animation-delay: 0.6s; }
+
+/* Estilo para el label de especialidad */
+.form-group label[for="instructorEspecialidad"] {
+    color: var(--primary-color);
+    font-weight: 600;
+    text-shadow: 0 0 5px var(--primary-color);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.form-group label[for="instructorEspecialidad"]::before {
+    content: '\f5d1';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+}
+
+/* Estilos para los nuevos campos de instructor */
+.form-group label[for="instructorSalario"] {
+    color: #28a745;
+    font-weight: 600;
+    text-shadow: 0 0 5px #28a745;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.form-group label[for="instructorSalario"]::before {
+    content: '\f3d1';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+}
+
+.form-group label[for="instructorExperiencia"] {
+    color: #ffc107;
+    font-weight: 600;
+    text-shadow: 0 0 5px #ffc107;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.form-group label[for="instructorExperiencia"]::before {
+    content: '\f19d';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+}
+
+.form-group label[for="instructorHorarios"] {
+    color: #17a2b8;
+    font-weight: 600;
+    text-shadow: 0 0 5px #17a2b8;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.form-group label[for="instructorHorarios"]::before {
+    content: '\f017';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+}
+
+.form-group label[for="instructorCertificaciones"] {
+    color: #6f42c1;
+    font-weight: 600;
+    text-shadow: 0 0 5px #6f42c1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.form-group label[for="instructorCertificaciones"]::before {
+    content: '\f5a0';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+}
+
+.form-group label[for="instructorEspecialidadesAdicionales"] {
+    color: #fd7e14;
+    font-weight: 600;
+    text-shadow: 0 0 5px #fd7e14;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.form-group label[for="instructorEspecialidadesAdicionales"]::before {
+    content: '\f0ad';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+}
+
+.form-group label[for="instructorNotas"] {
+    color: #e83e8c;
+    font-weight: 600;
+    text-shadow: 0 0 5px #e83e8c;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.form-group label[for="instructorNotas"]::before {
+    content: '\f15a';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+}
+
+/* Estilos para campos de número */
+#instructorSalario,
+#instructorExperiencia {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    color: var(--text-color);
+    font-size: 1rem;
+    padding: 12px;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+#instructorSalario:focus,
+#instructorExperiencia:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 15px var(--accent-color);
+    background: rgba(223, 255, 0, 0.1);
+}
+
+#instructorSalario:hover,
+#instructorExperiencia:hover {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 10px var(--accent-color);
+}
+
+/* Estilos para campos de texto adicionales */
+#instructorHorarios,
+#instructorCertificaciones,
+#instructorEspecialidadesAdicionales {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    color: var(--text-color);
+    font-size: 1rem;
+    padding: 12px;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+#instructorHorarios:focus,
+#instructorCertificaciones:focus,
+#instructorEspecialidadesAdicionales:focus {
+    outline: none;
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 15px var(--secondary-color);
+    background: rgba(0, 242, 255, 0.1);
+}
+
+#instructorHorarios:hover,
+#instructorCertificaciones:hover,
+#instructorEspecialidadesAdicionales:hover {
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 10px var(--secondary-color);
+}
+
+/* Estilos para el textarea de notas */
+#instructorNotas {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    color: var(--text-color);
+    font-size: 1rem;
+    padding: 12px;
+    resize: vertical;
+    min-height: 60px;
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+
+#instructorNotas:focus {
+    outline: none;
+    border-color: #e83e8c;
+    box-shadow: 0 0 15px #e83e8c;
+    background: rgba(232, 62, 140, 0.1);
+}
+
+#instructorNotas:hover {
+    border-color: #e83e8c;
+    box-shadow: 0 0 10px #e83e8c;
+}
+
+/* Animación para el modal de instructor */
+.modal-content {
+    animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Estilos para mensajes de éxito/error en el modal */
+.modal-message {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--glass-bg);
+    padding: 20px 30px;
+    border-radius: 15px;
+    box-shadow: 0 0 30px var(--glow-color);
+    border: 1px solid var(--primary-color);
+    z-index: 3000;
+    animation: messageSlideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(10px);
+}
+
+.modal-message.success {
+    border-color: #28a745;
+    box-shadow: 0 0 30px rgba(40, 167, 69, 0.7);
+}
+
+.modal-message.error {
+    border-color: var(--danger-color);
+    box-shadow: 0 0 30px rgba(255, 58, 87, 0.7);
+}
+
+@keyframes messageSlideIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+/* Estilo específico para el select de especialidad de instructores */
+#instructorEspecialidad {
+    background: linear-gradient(135deg, rgba(0,0,0,0.3), rgba(159, 47, 255, 0.1));
+    border: 1px solid var(--primary-color);
+    color: var(--primary-color);
+    font-weight: 600;
+    text-shadow: 0 0 5px var(--primary-color);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+#instructorEspecialidad:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 20px var(--primary-color), inset 0 0 10px rgba(159, 47, 255, 0.2);
+    background: linear-gradient(135deg, rgba(0,0,0,0.4), rgba(159, 47, 255, 0.2));
+    transform: translateY(-2px);
+}
+
+#instructorEspecialidad:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 15px var(--primary-color), inset 0 0 5px rgba(159, 47, 255, 0.1);
+    background: linear-gradient(135deg, rgba(0,0,0,0.3), rgba(159, 47, 255, 0.15));
+    transform: translateY(-1px);
+}
+
+/* Estilos para las opciones del select de especialidad */
+#instructorEspecialidad option {
+    background: var(--bg-color-dark);
+    color: var(--primary-color);
+    font-weight: 600;
+    padding: 12px;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+#instructorEspecialidad option:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: scale(1.05);
+}
+
+/* Estilos específicos para cada especialidad en el select */
+#instructorEspecialidad option[value="gym"] {
+    color: #ff6b6b;
+    text-shadow: 0 0 5px #ff6b6b;
+}
+
+#instructorEspecialidad option[value="zumba"] {
+    color: #ff9ff3;
+    text-shadow: 0 0 5px #ff9ff3;
+}
+
+#instructorEspecialidad option[value="crossfit"] {
+    color: #ff9f43;
+    text-shadow: 0 0 5px #ff9f43;
+}
+
+#instructorEspecialidad option[value="box"] {
+    color: #ee5a24;
+    text-shadow: 0 0 5px #ee5a24;
+}
+
+#instructorEspecialidad option[value="danza"] {
+    color: #a29bfe;
+    text-shadow: 0 0 5px #a29bfe;
+}
+
+/* Estilos para el textarea de descripción */
+#instructorDescripcion {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    color: var(--text-color);
+    font-size: 1rem;
+    padding: 12px;
+    resize: vertical;
+    min-height: 80px;
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+
+#instructorDescripcion:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 15px var(--accent-color);
+    background: rgba(223, 255, 0, 0.1);
+}
+
+#instructorDescripcion:hover {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 10px var(--accent-color);
+}
+
+/* Estilos para los campos de archivo */
+input[type="file"] {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    color: var(--text-color);
+    padding: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+input[type="file"]:hover {
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 10px var(--secondary-color);
+    background: rgba(0, 242, 255, 0.1);
+}
+
+input[type="file"]:focus {
+    outline: none;
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 15px var(--secondary-color);
+}
+
+/* Estilos para el label de archivos */
+.form-group label[for="instructorFoto"],
+.form-group label[for="instructorContrato"] {
+    color: var(--secondary-color);
+    font-weight: 600;
+    text-shadow: 0 0 5px var(--secondary-color);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.form-group label[for="instructorFoto"]::before {
+    content: '\f03e';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+}
+
+.form-group label[for="instructorContrato"]::before {
+    content: '\f15c';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+}
+
+/* Estilo para el label de descripción */
+.form-group label[for="instructorDescripcion"] {
+    color: var(--accent-color);
+    font-weight: 600;
+    text-shadow: 0 0 5px var(--accent-color);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.form-group label[for="instructorDescripcion"]::before {
+    content: '\f15a';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+}
+
+/* Contadores en filtros de instructores */
+.filter-count {
+    background: var(--primary-color);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-left: 5px;
+    display: inline-block;
+    min-width: 20px;
+    text-align: center;
+}
+
+.filter-btn:hover .filter-count {
+    background: var(--secondary-color);
+    color: var(--bg-color-dark);
+    transform: scale(1.1);
+    transition: all 0.3s ease;
+}
+
+.filter-btn.active .filter-count {
+    background: white;
+    color: var(--primary-color);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+  
