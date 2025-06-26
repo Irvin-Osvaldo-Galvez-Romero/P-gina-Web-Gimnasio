@@ -80,7 +80,7 @@
         </nav>
 
         <div class="dashboard-content">
-            <h1>Dashboard</h1>
+            <h1 class="section-title dashboard">Dashboard</h1>
             
             <div class="stats-cards">
                 <div class="stat-card" onclick="selectStat('clientes')">
@@ -908,7 +908,7 @@
         </nav>
 
         <div class="reportes-content">
-            <h1>Reportes</h1>
+            <h1 class="section-title reportes">Reportes</h1>
             
             <div class="reportes-cards">
                 <div class="reporte-card">
@@ -999,7 +999,7 @@
 
         <div class="content">
             <div class="content-header">
-                <h1>Configuración</h1>
+                <h1 class="section-title configuracion">Configuración</h1>
             </div>
 
             <div class="config-container">
@@ -1014,6 +1014,15 @@
                             <input type="range" id="fontSizeSlider" min="0.8" max="1.2" step="0.1" value="1">
                             <span>Grande</span>
                         </div>
+                    </div>
+                    <div class="config-option">
+                        <label for="themeToggle">
+                            <i class="fas fa-adjust"></i> Tema (Claro / Oscuro)
+                        </label>
+                        <label class="switch">
+                            <input type="checkbox" id="themeToggle">
+                            <span class="slider round"></span>
+                        </label>
                     </div>
                     <div class="config-option">
                         <label for="fontFamilySelect">

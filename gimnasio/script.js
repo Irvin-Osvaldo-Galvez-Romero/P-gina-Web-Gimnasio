@@ -2975,3 +2975,37 @@ function togglePassword() {
         passwordToggle.classList.remove('active');
     }
 }
+
+// --- Modo Claro/Oscuro ---
+function setupThemeToggle() {
+    const themeToggle = document.getElementById('themeToggle');
+    const body = document.body;
+    // Cargar preferencia guardada
+    const savedTheme = localStorage.getItem('themeMode');
+    if (savedTheme === 'light') {
+        body.classList.add('light-mode');
+        if (themeToggle) themeToggle.checked = true;
+    } else {
+        body.classList.remove('light-mode');
+        if (themeToggle) themeToggle.checked = false;
+    }
+    // Listener para el switch
+    if (themeToggle) {
+        themeToggle.addEventListener('change', function() {
+            if (this.checked) {
+                body.classList.add('light-mode');
+                localStorage.setItem('themeMode', 'light');
+            } else {
+                body.classList.remove('light-mode');
+                localStorage.setItem('themeMode', 'dark');
+            }
+        });
+    }
+}
+
+// Llamar al cargar la app
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupThemeToggle);
+} else {
+    setupThemeToggle();
+}

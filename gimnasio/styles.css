@@ -24,6 +24,60 @@ body {
     overflow-x: hidden;
 }
 
+body.light-mode {
+    --primary-color: #7b2ff2;
+    --secondary-color: #00c6ff;
+    --accent-color: #ffd700;
+    --bg-color-dark: #f4f4f4;
+    --text-color: #222;
+    --glass-bg: rgba(255,255,255,0.7);
+    --glass-border: rgba(123, 47, 242, 0.2);
+    --glow-color: rgba(123, 47, 242, 0.3);
+    --danger-color: #e74c3c;
+}
+
+body.light-mode .login-box,
+body.light-mode .glass-box,
+body.light-mode .modal-content {
+    background: var(--glass-bg);
+    color: var(--text-color);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 0 30px rgba(123, 47, 242, 0.08);
+}
+
+body.light-mode .screen {
+    background: var(--bg-color-dark);
+}
+
+body.light-mode .nav-btn.active {
+    background: var(--primary-color);
+    color: #fff;
+}
+
+body.light-mode .nav-btn {
+    color: var(--text-color);
+}
+
+body.light-mode .login-btn {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: #fff;
+}
+
+body.light-mode .input-group input,
+body.light-mode .form-group input,
+body.light-mode .form-group select {
+    background: rgba(255,255,255,0.8);
+    color: var(--text-color);
+    border: 1px solid var(--glass-border);
+}
+
+body.light-mode .input-group input:focus,
+body.light-mode .form-group input:focus,
+body.light-mode .form-group select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 10px var(--primary-color);
+}
+
 /* Pantallas */
 .screen {
     display: none;
@@ -2603,5 +2657,131 @@ input[type="file"]:focus {
 .password-group input[type="password"],
 .password-group input[type="text"] {
     padding-left: 50px;
+}
+
+body.light-mode .navbar {
+    background: rgba(255,255,255,0.85) !important;
+    border-bottom: 1px solid #e0e0e0;
+    box-shadow: 0 2px 16px 0 rgba(123,47,242,0.07);
+}
+
+body.light-mode .nav-btn {
+    color: #333 !important;
+    font-weight: 600;
+    opacity: 1 !important;
+}
+
+body.light-mode .nav-btn.active {
+    background: #fff !important;
+    color: #222 !important;
+    box-shadow: 0 0 10px #e0e0e0;
+    border: 1px solid #e0e0e0;
+    font-weight: 700;
+}
+
+body.light-mode .nav-btn:hover:not(.active) {
+    background: #f5f5f5 !important;
+    color: #111 !important;
+    box-shadow: 0 0 8px #e0e0e0;
+}
+
+body.light-mode .nav-btn::before {
+    background: none !important;
+}
+
+body.light-mode .nav-brand {
+    color: #7b2ff2 !important;
+}
+
+body.light-mode .nav-logo {
+    filter: none !important;
+}
+
+body.light-mode .table-container {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 16px 0 rgba(123,47,242,0.07);
+    border: 1px solid #e0e0e0;
+    padding: 0.5rem 0.5rem 1.5rem 0.5rem;
+}
+
+body.light-mode table {
+    background: #fff;
+    color: #222;
+    border-radius: 12px;
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+    box-shadow: none;
+}
+
+body.light-mode th {
+    background: linear-gradient(90deg, #e3eaff 60%, #c6e2ff 100%);
+    color: #222;
+    font-weight: 700;
+    border-bottom: 2px solid #d0d0d0;
+    padding: 12px 8px;
+}
+
+body.light-mode td {
+    background: #fff;
+    color: #222;
+    border-bottom: 1px solid #f0f0f0;
+    padding: 10px 8px;
+}
+
+body.light-mode tr:nth-child(even) td {
+    background: #f7f8fa;
+}
+
+body.light-mode tr:hover td {
+    background: #eaf1ff;
+    color: #111;
+}
+
+body.light-mode .search-container {
+    background: transparent;
+}
+
+body.light-mode .btn-primary {
+    background: linear-gradient(135deg, #7b2ff2, #00c6ff);
+    color: #fff;
+    border: none;
+}
+
+body.light-mode .btn-primary:hover {
+    background: linear-gradient(135deg, #00c6ff, #7b2ff2);
+    color: #fff;
+}
+
+/* --- Mejorar subtítulos en tarjetas de métricas --- */
+body.light-mode .stat-info p,
+body.light-mode .reporte-info p {
+    color: #222 !important;
+    font-weight: 600;
+    text-shadow: 0 1px 6px #fff, 0 0 2px #fff;
+    opacity: 0.85;
+}
+
+/* --- Títulos de sección con color dinámico --- */
+.section-title {
+    transition: color 0.3s;
+    text-shadow: 0 0 10px var(--primary-color), 0 2px 8px #fff8;
+}
+
+.section-title.dashboard { color: #7b2ff2; }
+.section-title.clientes { color: #00c6ff; }
+.section-title.historial { color: #20c997; }
+.section-title.instructores { color: #ff3a57; }
+.section-title.ventas { color: #ffd700; }
+.section-title.productos { color: #00bfff; }
+.section-title.administradores { color: #6f00ff; }
+.section-title.reportes { color: #222; text-shadow: 0 0 10px #ffd700, 0 2px 8px #fff8; }
+.section-title.configuracion { color: #333; text-shadow: 0 0 10px #00c6ff, 0 2px 8px #fff8; }
+
+/* Ajuste para modo oscuro: títulos siempre claros */
+body:not(.light-mode) .section-title {
+    color: #fff !important;
+    text-shadow: 0 0 10px var(--primary-color), 0 2px 8px #0008;
 }
   
