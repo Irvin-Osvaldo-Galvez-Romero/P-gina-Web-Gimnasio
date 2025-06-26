@@ -2505,4 +2505,71 @@ input[type="file"]:focus {
     color: var(--primary-color);
     box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
 }
+
+/* Animación de gradiente animado en letras de botones de navegación */
+@keyframes animatedTextGradient {
+    0% {
+        background-position: 0% 50%;
+    }
+    100% {
+        background-position: 100% 50%;
+    }
+}
+
+.nav-btn span, .nav-btn .nav-text {
+    background: linear-gradient(90deg, #00f2ff, #9f2fff, #dfff00, #00f2ff);
+    background-size: 300% 300%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
+    animation: animatedTextGradient 3s linear infinite;
+    font-weight: 700;
+    letter-spacing: 1px;
+    transition: filter 0.3s;
+}
+
+/* Efecto especial para el botón activo */
+.nav-btn.active span, .nav-btn.active .nav-text {
+    filter: drop-shadow(0 0 8px #dfff00) drop-shadow(0 0 4px #00f2ff);
+    animation-duration: 1.2s;
+}
+
+.nav-btn.active {
+    background: linear-gradient(90deg, #9f2fff 0%, #00f2ff 100%);
+    box-shadow: 0 0 18px 2px #00f2ff, 0 0 8px 2px #dfff00;
+    color: #fff;
+    border-radius: 10px;
+    transform: scale(1.06);
+    z-index: 2;
+}
+
+/* Estilos para todos los select (combobox) completamente translúcidos */
+select {
+    background: rgba(20, 10, 40, 0.427) !important; /* Mucho más translúcido, casi transparente */
+    border: 2px solid #7f00ff;
+    color: #00f0ff !important;
+    font-weight: 600;
+    text-shadow: 0 0 8px #00f0ff, 0 0 2px #7f00ff;
+    box-shadow: 0 0 12px #7f00ff, 0 0 4px #00f0ff;
+    border-radius: 12px;
+    padding: 10px 12px;
+    transition: box-shadow 0.3s, border 0.3s, background 0.3s;
+    backdrop-filter: blur(8px);
+}
+
+select:focus {
+    outline: none;
+    border-color: #00f0ff;
+    box-shadow: 0 0 20px #00f0ff, 0 0 10px #7f00ff;
+    background: rgba(20, 10, 40, 0.18) !important;
+}
+
+select option {
+    background: rgba(42, 12, 104, 0.682) !important; /* Muy translúcido */
+    color: #00f0ff !important;
+    font-weight: 600;
+    text-shadow: 0 0 8px #00f0ff, 0 0 2px #7f00ff;
+    backdrop-filter: blur(10px);
+}
   

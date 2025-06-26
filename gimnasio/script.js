@@ -477,14 +477,21 @@ function showScreen(screenName) {
         btn.style.transform = 'scale(1)';
     });
     
-    const activeBtn = document.querySelector(`[onclick="showScreen('${screenName}')"]`);
-    if (activeBtn) {
-        activeBtn.classList.add('active');
-        activeBtn.style.transform = 'scale(1.05)';
-        setTimeout(() => {
-            activeBtn.style.transform = '';
-        }, 300);
-    }
+    // Buscar todos los nav-menu visibles y marcar el botón correcto
+    document.querySelectorAll('.nav-menu').forEach(menu => {
+        const btns = menu.querySelectorAll('.nav-btn');
+        btns.forEach(btn => {
+            // Obtener el nombre de la vista asociada al botón
+            const onclickAttr = btn.getAttribute('onclick');
+            if (onclickAttr && onclickAttr.includes(`showScreen('${screenName}')`)) {
+                btn.classList.add('active');
+                btn.style.transform = 'scale(1.05)';
+                setTimeout(() => {
+                    btn.style.transform = '';
+                }, 300);
+            }
+        });
+    });
 }
 
 // Función para actualizar la UI basada en el rol del usuario
@@ -518,7 +525,7 @@ async function login() {
     const password = document.getElementById('password').value;
     
     if (!username || !password) {
-        mostrarMensaje('Por favor, completa todos los campos', 'error');
+        showAlert('Por favor, completa todos los campos', 'error');
         return;
     }
     
@@ -705,8 +712,10 @@ function loadClientes() {
 function renderClientesTable() {
     const tbody = document.getElementById('clientesTableBody');
     tbody.innerHTML = '';
-    
+    const hoy = new Date();
     clientes.forEach(cliente => {
+        const fechaFin = new Date(cliente.fechaFin);
+        if (fechaFin < hoy) return; // Ocultar clientes con membresía vencida
         const row = document.createElement('tr');
         const clienteId = cliente.id || cliente._id;
         row.innerHTML = `
@@ -733,13 +742,34 @@ function renderClientesTable() {
     });
 }
 
-function showClientForm(cliente = null) {
+function showClientForm(cliente = null, soloMembresia = false) {
     const modal = document.getElementById('clientModal');
     const title = document.getElementById('clientModalTitle');
     const form = document.getElementById('clientForm');
-    
+
+    // Siempre habilitar todos los campos al abrir
+    document.getElementById('clienteNombre').disabled = false;
+    document.getElementById('clienteApellidos').disabled = false;
+    document.getElementById('clienteEdad').disabled = false;
+    document.getElementById('clienteEnfermedad').disabled = false;
+    document.getElementById('clienteAlergia').disabled = false;
+    document.getElementById('clienteDireccion').disabled = false;
+    document.getElementById('clienteMembresia').disabled = false;
+
     if (cliente) {
-        title.textContent = 'Editar Cliente';
+        if (soloMembresia) {
+            title.textContent = 'Editar Tipo de Membresía';
+            // Deshabilitar todos los campos excepto tipo de membresía
+            document.getElementById('clienteNombre').disabled = true;
+            document.getElementById('clienteApellidos').disabled = true;
+            document.getElementById('clienteEdad').disabled = true;
+            document.getElementById('clienteEnfermedad').disabled = true;
+            document.getElementById('clienteAlergia').disabled = true;
+            document.getElementById('clienteDireccion').disabled = true;
+            document.getElementById('clienteMembresia').disabled = false;
+        } else {
+            title.textContent = 'Editar Cliente';
+        }
         document.getElementById('clienteId').value = cliente.id || cliente._id || '';
         document.getElementById('clienteNombre').value = cliente.nombre || '';
         document.getElementById('clienteApellidos').value = cliente.apellidos || '';
@@ -755,7 +785,6 @@ function showClientForm(cliente = null) {
         const tempId = 'TEMP_' + Date.now();
         document.getElementById('clienteId').value = tempId;
     }
-    
     modal.style.display = 'block';
 }
 
@@ -766,10 +795,10 @@ function closeClientModal() {
 function editCliente(id) {
     const cliente = clientes.find(c => (c.id === id) || (c._id === id));
     if (cliente) {
-        showClientForm(cliente);
+        showClientForm(cliente, false); // Siempre edición completa
     } else {
         console.error('❌ Cliente no encontrado con ID:', id);
-        mostrarMensaje('Cliente no encontrado', 'error');
+        showAlert('Cliente no encontrado', 'error');
     }
 }
 
@@ -783,13 +812,13 @@ async function deleteCliente(id) {
             if (response.ok) {
                 clientes = clientes.filter(c => (c.id !== id) && (c._id !== id));
         renderClientesTable();
-                mostrarMensaje('Cliente eliminado correctamente', 'success');
+                showAlert('Cliente eliminado correctamente', 'success');
             } else {
-                mostrarMensaje('Error al eliminar cliente', 'error');
+                showAlert('Error al eliminar cliente', 'error');
             }
         } catch (error) {
             console.error('Error eliminando cliente:', error);
-            mostrarMensaje('Error de conexión', 'error');
+            showAlert('Error de conexión', 'error');
         }
     }
 }
@@ -840,12 +869,9 @@ document.getElementById('clientForm').addEventListener('submit', async function(
         
         if (response.ok) {
             if (clienteId) {
-                mostrarMensaje('Cliente actualizado correctamente', 'success');
+                showAlert('Cliente actualizado correctamente', 'success');
             } else {
-                const nuevoCliente = await response.json();
-                console.log('✅ Nuevo cliente creado:', nuevoCliente);
-                clientes.push(nuevoCliente);
-                mostrarMensaje('Cliente agregado correctamente', 'success');
+                showAlert('Nuevo Usuario Creado', 'success');
             }
             
             // Recargar datos desde el servidor
@@ -855,11 +881,11 @@ document.getElementById('clientForm').addEventListener('submit', async function(
         } else {
             const errorData = await response.json();
             console.error('❌ Error del servidor:', errorData);
-            mostrarMensaje(errorData.error || 'Error al procesar cliente', 'error');
+            showAlert(errorData.error || 'Error al procesar cliente', 'error');
         }
     } catch (error) {
         console.error('❌ Error procesando cliente:', error);
-        mostrarMensaje('Error de conexión: ' + error.message, 'error');
+        showAlert('Error de conexión: ' + error.message, 'error');
     }
 });
 
@@ -1167,7 +1193,7 @@ function editProducto(id) {
         showProductForm(producto);
     } else {
         console.error('❌ Producto no encontrado con ID:', id);
-        mostrarMensaje('Producto no encontrado', 'error');
+        showAlert('Producto no encontrado', 'error');
     }
 }
 
@@ -1181,13 +1207,13 @@ async function deleteProducto(id) {
             if (response.ok) {
                 productos = productos.filter(p => (p.id !== id) && (p._id !== id));
         renderProductosTable();
-                mostrarMensaje('Producto eliminado correctamente', 'success');
+                showAlert('Producto eliminado correctamente', 'success');
             } else {
-                mostrarMensaje('Error al eliminar producto', 'error');
+                showAlert('Error al eliminar producto', 'error');
             }
         } catch (error) {
             console.error('Error eliminando producto:', error);
-            mostrarMensaje('Error de conexión', 'error');
+            showAlert('Error de conexión', 'error');
         }
     }
 }
@@ -1227,8 +1253,11 @@ document.getElementById('productForm').addEventListener('submit', async function
         console.log('📡 Respuesta del servidor:', response.status);
         
         if (response.ok) {
-            const successMessage = isUpdate ? 'Producto actualizado correctamente' : 'Producto agregado correctamente';
-            mostrarMensaje(successMessage, 'success');
+            if (isUpdate) {
+                showAlert('Producto actualizado correctamente', 'success');
+            } else {
+                showAlert('Nuevo Producto Creado', 'success');
+            }
             
             // Recargar datos desde el servidor para reflejar los cambios
             await cargarDatosDesdeMongoDB();
@@ -1243,11 +1272,11 @@ document.getElementById('productForm').addEventListener('submit', async function
         } else {
             const errorData = await response.json();
             console.error('❌ Error del servidor:', errorData);
-            mostrarMensaje(errorData.error || 'Error al procesar producto', 'error');
+            showAlert(errorData.error || 'Error al procesar producto', 'error');
         }
     } catch (error) {
         console.error('❌ Error procesando producto:', error);
-        mostrarMensaje('Error de conexión: ' + error.message, 'error');
+        showAlert('Error de conexión: ' + error.message, 'error');
     }
 });
 
@@ -1371,7 +1400,7 @@ function editAdmin(id) {
         showAdminForm(admin);
     } else {
         console.error('❌ Administrador no encontrado con ID:', id);
-        mostrarMensaje('Administrador no encontrado', 'error');
+        showAlert('Administrador no encontrado', 'error');
     }
 }
 
@@ -1385,13 +1414,13 @@ async function deleteAdmin(id) {
             if (response.ok) {
                 administradores = administradores.filter(a => (a.id !== id) && (a._id !== id));
         renderAdministradoresTable();
-                mostrarMensaje('Administrador eliminado correctamente', 'success');
+                showAlert('Administrador eliminado correctamente', 'success');
             } else {
-                mostrarMensaje('Error al eliminar administrador', 'error');
+                showAlert('Error al eliminar administrador', 'error');
             }
         } catch (error) {
             console.error('Error eliminando administrador:', error);
-            mostrarMensaje('Error de conexión', 'error');
+            showAlert('Error de conexión', 'error');
         }
     }
 }
@@ -1437,12 +1466,9 @@ document.getElementById('adminForm').addEventListener('submit', async function(e
         
         if (response.ok) {
             if (adminId) {
-                mostrarMensaje('Administrador actualizado correctamente', 'success');
+                showAlert('Administrador actualizado correctamente', 'success');
             } else {
-                const nuevoAdmin = await response.json();
-                console.log('✅ Nuevo administrador creado:', nuevoAdmin);
-                administradores.push(nuevoAdmin);
-                mostrarMensaje('Administrador agregado correctamente', 'success');
+                showAlert('Nuevo Administrador Creado', 'success');
             }
             
             // Recargar datos desde el servidor
@@ -1452,11 +1478,11 @@ document.getElementById('adminForm').addEventListener('submit', async function(e
         } else {
             const errorData = await response.json();
             console.error('❌ Error del servidor:', errorData);
-            mostrarMensaje(errorData.error || 'Error al procesar administrador', 'error');
+            showAlert(errorData.error || 'Error al procesar administrador', 'error');
         }
     } catch (error) {
         console.error('❌ Error procesando administrador:', error);
-        mostrarMensaje('Error de conexión: ' + error.message, 'error');
+        showAlert('Error de conexión: ' + error.message, 'error');
     }
 });
 
@@ -2155,7 +2181,7 @@ async function loadDashboardData() {
 
 // Función para cargar el historial
 async function loadHistorial() {
-    console.log('📋 Cargando historial...');
+    console.log('📋 Cargando historial... (DEBUG)');
     await renderSuscripcionesTable();
     renderHistorialTable();
     setupHistorialSearch();
@@ -2189,16 +2215,20 @@ async function renderSuscripcionesTable() {
                 <td>${formatearFecha(cliente.fechaFin)}</td>
                 <td class="${diasClass}">${cliente.diasRestantes > 0 ? cliente.diasRestantes + ' días' : 'Vencida hace ' + Math.abs(cliente.diasRestantes) + ' días'}</td>
                 <td><span class="${estado}">${getEstadoTexto(cliente.diasRestantes)}</span></td>
+                <td>
+                    <button class="btn-edit" onclick="editarTipoMembresia('${cliente.id}')" title="Editar tipo de membresía">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                </td>
             `;
-
             tbody.appendChild(row);
         });
 
         if (suscripcionesProximas.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--text-color);">No hay suscripciones próximas a vencer</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: var(--text-color);">No hay suscripciones próximas a vencer</td></tr>';
         }
     } catch (error) {
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--text-color);">Error al cargar suscripciones</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: var(--text-color);">Error al cargar suscripciones</td></tr>';
         console.error('Error al cargar suscripciones que terminan pronto:', error);
     }
 }
@@ -2226,10 +2256,14 @@ function renderHistorialTable() {
     .filter(cliente => cliente.diasRestantes > 7)
     .sort((a, b) => b.fechaInicio - a.fechaInicio); // Ordenar por fecha de registro más reciente
 
+    if (historialCompleto.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; color: var(--text-color);">No hay clientes con membresía activa</td></tr>';
+        return;
+    }
+
     historialCompleto.forEach(cliente => {
         const row = document.createElement('tr');
         const estado = getEstadoSuscripcion(cliente.diasRestantes);
-        
         row.innerHTML = `
             <td>${cliente.id}</td>
             <td>${cliente.nombre}</td>
@@ -2240,14 +2274,14 @@ function renderHistorialTable() {
             <td>${formatearFecha(cliente.fechaFin)}</td>
             <td><span class="${estado}">${getEstadoTexto(cliente.diasRestantes)}</span></td>
             <td>${formatearFecha(cliente.fechaInicio)}</td>
+            <td>
+                <button class="btn-edit" onclick="editarTipoMembresia('${cliente.id}')" title="Editar tipo de membresía">
+                    <i class="fas fa-edit"></i>
+                </button>
+            </td>
         `;
-        
         tbody.appendChild(row);
     });
-
-    if (historialCompleto.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: var(--text-color);">No hay clientes con membresía activa</td></tr>';
-    }
 }
 
 // Función para configurar la búsqueda del historial
@@ -2615,7 +2649,7 @@ function editInstructor(id) {
         showInstructorForm(instructor);
     } else {
         console.error('❌ Instructor no encontrado con ID:', id);
-        mostrarMensaje('Instructor no encontrado', 'error');
+        showAlert('Instructor no encontrado', 'error');
     }
 }
 
@@ -2631,13 +2665,13 @@ async function deleteInstructor(id) {
                 instructores = instructores.filter(i => i._id !== id);
                 renderInstructoresGrid();
                 renderInstructoresTable();
-                mostrarMensaje('Instructor eliminado correctamente', 'success');
+                showAlert('Instructor eliminado correctamente', 'success');
             } else {
-                mostrarMensaje('Error al eliminar instructor', 'error');
+                showAlert('Error al eliminar instructor', 'error');
             }
         } catch (error) {
             console.error('Error eliminando instructor:', error);
-            mostrarMensaje('Error de conexión', 'error');
+            showAlert('Error de conexión', 'error');
         }
     }
 }
@@ -2955,4 +2989,56 @@ function actualizarContadoresFiltros() {
         const originalText = button.textContent.replace(/\d+$/, '').trim();
         button.innerHTML = `${icon.outerHTML} ${originalText} <span class="filter-count">(${count})</span>`;
     });
+}
+
+// Nueva función para editar solo el tipo de membresía desde la tabla de suscripciones
+function editarTipoMembresia(clienteId) {
+    const cliente = clientes.find(c => (c.id === clienteId || c._id === clienteId));
+    if (!cliente) return;
+    document.getElementById('membresiaModalTitle').textContent = 'Editar Tipo de Membresía';
+    document.getElementById('membresiaTipo').value = cliente.tipoMembresia || '';
+    document.getElementById('membresiaModal').setAttribute('data-cliente-id', clienteId);
+    document.getElementById('membresiaModal').style.display = 'block';
+}
+
+function closeMembresiaModal() {
+    document.getElementById('membresiaModal').style.display = 'none';
+    document.getElementById('membresiaModal').removeAttribute('data-cliente-id');
+}
+
+document.getElementById('membresiaForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const clienteId = document.getElementById('membresiaModal').getAttribute('data-cliente-id');
+    const nuevoTipo = document.getElementById('membresiaTipo').value;
+    if (!clienteId || !nuevoTipo) return;
+    try {
+        const response = await fetch(`/api/clientes/${clienteId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ tipoMembresia: nuevoTipo })
+        });
+        if (response.ok) {
+            showAlert('Tipo de membresía actualizado correctamente', 'success');
+            await cargarDatosDesdeMongoDB();
+            renderHistorialTable();
+            closeMembresiaModal();
+        } else {
+            showAlert('Error al actualizar membresía', 'error');
+        }
+    } catch (error) {
+        showAlert('Error de conexión', 'error');
+    }
+});
+
+// Al cerrar el modal, volver a habilitar los campos
+function closeClientModal() {
+    const modal = document.getElementById('clientModal');
+    modal.style.display = 'none';
+    document.getElementById('clienteNombre').disabled = false;
+    document.getElementById('clienteApellidos').disabled = false;
+    document.getElementById('clienteEdad').disabled = false;
+    document.getElementById('clienteEnfermedad').disabled = false;
+    document.getElementById('clienteAlergia').disabled = false;
+    document.getElementById('clienteDireccion').disabled = false;
+    document.getElementById('clienteMembresia').disabled = false;
 }

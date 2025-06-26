@@ -301,7 +301,7 @@
 
             <!-- Sección de Suscripciones que Terminan Pronto -->
             <div class="historial-section">
-                <h2><i class="fas fa-clock"></i> Suscripciones que Terminan Pronto</h2>
+                <h2><i class="fas fa-clock"></i> Suscripciones Vencidas</h2>
                 <div class="table-container">
                     <table id="suscripcionesTable">
                         <thead>
@@ -314,6 +314,7 @@
                                 <th>Fecha de Vencimiento</th>
                                 <th>Días Restantes</th>
                                 <th>Estado</th>
+                                <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="suscripcionesTableBody">
@@ -342,6 +343,7 @@
                                 <th>Fecha de Vencimiento</th>
                                 <th>Estado</th>
                                 <th>Última Actividad</th>
+                                <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="historialTableBody">
@@ -1087,6 +1089,30 @@
                     </button>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Modal para editar solo tipo de membresía (exclusivo de historial) -->
+    <div id="membresiaModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeMembresiaModal()">&times;</span>
+            <h2 id="membresiaModalTitle">Editar Tipo de Membresía</h2>
+            <form id="membresiaForm">
+                <div class="form-group">
+                    <label for="membresiaTipo">Tipo de Membresía:</label>
+                    <select id="membresiaTipo" required>
+                        <option value="">Seleccionar...</option>
+                        <option value="Mensual">Mensual</option>
+                        <option value="Trimestral">Trimestral</option>
+                        <option value="Semestral">Semestral</option>
+                        <option value="Anual">Anual</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="closeMembresiaModal()">Cancelar</button>
+                    <button type="submit" class="btn-primary">Guardar</button>
+                </div>
+            </form>
         </div>
     </div>
 
