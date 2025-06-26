@@ -135,6 +135,33 @@ body {
     box-shadow: 0 0 10px var(--primary-color);
 }
 
+/* Estilos para el ícono de mostrar/ocultar contraseña */
+.password-toggle {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--secondary-color);
+    font-size: 1.125rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+
+.password-toggle:hover {
+    color: var(--primary-color);
+    transform: translateY(-50%) scale(1.1);
+}
+
+.password-toggle.active {
+    color: var(--accent-color);
+}
+
+/* Ajustar el padding del input de contraseña para dar espacio al ícono */
+.input-group input[type="password"] {
+    padding-right: 50px;
+}
+
 .login-btn {
     width: 100%;
     padding: 15px;
@@ -2504,5 +2531,77 @@ input[type="file"]:focus {
     background: white;
     color: var(--primary-color);
     box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.password-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.password-group input[type="password"],
+.password-group input[type="text"] {
+    width: 100%;
+    padding: 15px 15px 15px 50px;
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    font-size: 1rem;
+    background-color: rgba(0,0,0,0.2);
+    color: var(--text-color);
+    box-sizing: border-box;
+    transition: none;
+}
+
+.password-toggle-btn {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    height: 24px;
+    width: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+}
+
+.password-toggle {
+    color: var(--secondary-color);
+    font-size: 1.125rem;
+    pointer-events: none;
+    transition: none;
+}
+
+.password-toggle.active {
+    color: var(--accent-color);
+}
+
+.password-toggle-btn:focus {
+    outline: none;
+}
+
+.password-toggle-btn:hover .password-toggle {
+    color: var(--primary-color);
+}
+
+.password-group .lock-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--secondary-color);
+    font-size: 1.125rem;
+    z-index: 2;
+}
+
+.password-group input[type="password"],
+.password-group input[type="text"] {
+    padding-left: 50px;
 }
   

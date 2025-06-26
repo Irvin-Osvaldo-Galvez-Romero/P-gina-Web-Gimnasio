@@ -403,10 +403,14 @@ function showScreen(screenName) {
     // Manejar casos especiales
     if (screenName === 'salir') {
         document.getElementById('salirScreen').classList.add('active', 'fade-up');
+        // Actualizar estado activo en menú
+        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
         return;
     }
     if (screenName === 'login') {
         document.getElementById('loginScreen').classList.add('active');
+        // Actualizar estado activo en menú
+        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
         return;
     }
 
@@ -470,21 +474,16 @@ function showScreen(screenName) {
             }, 300);
         }, 650);
     }, 500);
-    
-    // Actualizar botones de navegación con animación
+
+    // Actualizar botones de navegación: solo uno debe tener 'active'
+    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+    // Buscar el botón correspondiente en todos los menús
     document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.classList.remove('active');
-        btn.style.transform = 'scale(1)';
+        const onclick = btn.getAttribute('onclick');
+        if (onclick && onclick.includes(`showScreen('${screenName}')`)) {
+            btn.classList.add('active');
+        }
     });
-    
-    const activeBtn = document.querySelector(`[onclick="showScreen('${screenName}')"]`);
-    if (activeBtn) {
-        activeBtn.classList.add('active');
-        activeBtn.style.transform = 'scale(1.05)';
-        setTimeout(() => {
-            activeBtn.style.transform = '';
-        }, 300);
-    }
 }
 
 // Función para actualizar la UI basada en el rol del usuario
@@ -2955,4 +2954,24 @@ function actualizarContadoresFiltros() {
         const originalText = button.textContent.replace(/\d+$/, '').trim();
         button.innerHTML = `${icon.outerHTML} ${originalText} <span class="filter-count">(${count})</span>`;
     });
+}
+
+// Función para mostrar/ocultar contraseña en el login
+function togglePassword() {
+    const passwordInput = document.getElementById('password');
+    const passwordToggle = document.getElementById('passwordToggle');
+    
+    if (passwordInput.type === 'password') {
+        // Mostrar contraseña
+        passwordInput.type = 'text';
+        passwordToggle.classList.remove('fa-eye');
+        passwordToggle.classList.add('fa-eye-slash');
+        passwordToggle.classList.add('active');
+    } else {
+        // Ocultar contraseña
+        passwordInput.type = 'password';
+        passwordToggle.classList.remove('fa-eye-slash');
+        passwordToggle.classList.add('fa-eye');
+        passwordToggle.classList.remove('active');
+    }
 }
