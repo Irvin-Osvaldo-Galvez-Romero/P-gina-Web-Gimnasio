@@ -9,12 +9,15 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+    <!-- Contenedor de notificaciones -->
+    <div class="notification-container"></div>
+    
     <!-- Login Screen -->
     <div id="loginScreen" class="screen active">
         <div class="login-container">
             <div class="login-box">
                 <div class="logo-container">
-                    <img src="Imagenes/Logo2.png" alt="Logo Gimnasio" class="logo">
+                    <img src="Imagenes/LogoL.png" alt="Logo Gimnasio" class="logo">
                 </div>
                 <h2>Iniciar Sesión</h2>
                 <form id="loginForm">
@@ -25,6 +28,9 @@
                     <div class="input-group">
                         <i class="fas fa-lock"></i>
                         <input type="password" id="password" placeholder="Contraseña" required>
+                        <button type="button" class="password-toggle" onclick="togglePassword('password')">
+                            <i class="fas fa-eye"></i>
+                        </button>
                     </div>
                     <button type="submit" class="login-btn">
                         <i class="fas fa-sign-in-alt"></i>
@@ -39,7 +45,7 @@
     <div id="dashboardScreen" class="screen">
         <nav class="navbar">
             <div class="nav-brand">
-                <img src="Imagenes/Logo2.png" alt="Logo" class="nav-logo">
+                <img src="Imagenes/LogoL.png" alt="Logo" class="nav-logo">
                 <span>Gimnasio</span>
             </div>
             <div class="nav-menu">
@@ -121,7 +127,7 @@
     <div id="clientesScreen" class="screen">
         <nav class="navbar">
             <div class="nav-brand">
-                <img src="Imagenes/Logo2.png" alt="Logo" class="nav-logo">
+                <img src="Imagenes/LogoL.png" alt="Logo" class="nav-logo">
                 <span>Gimnasio</span>
             </div>
             <div class="nav-menu">
@@ -257,7 +263,7 @@
     <div id="historialScreen" class="screen">
         <nav class="navbar">
             <div class="nav-brand">
-                <img src="Imagenes/Logo2.png" alt="Logo" class="nav-logo">
+                <img src="Imagenes/LogoL.png" alt="Logo" class="nav-logo">
                 <span>Gimnasio</span>
             </div>
             <div class="nav-menu">
@@ -358,7 +364,7 @@
     <div id="instructoresScreen" class="screen">
         <nav class="navbar">
             <div class="nav-brand">
-                <img src="Imagenes/Logo2.png" alt="Logo" class="nav-logo">
+                <img src="Imagenes/LogoL.png" alt="Logo" class="nav-logo">
                 <span>Gimnasio</span>
             </div>
             <div class="nav-menu">
@@ -579,7 +585,7 @@
     <div id="ventasScreen" class="screen">
         <nav class="navbar">
             <div class="nav-brand">
-                <img src="Imagenes/Logo2.png" alt="Logo" class="nav-logo">
+                <img src="Imagenes/LogoL.png" alt="Logo" class="nav-logo">
                 <span>Gimnasio</span>
             </div>
             <div class="nav-menu">
@@ -644,7 +650,7 @@
     <div id="productosScreen" class="screen">
         <nav class="navbar">
             <div class="nav-brand">
-                <img src="Imagenes/Logo2.png" alt="Logo" class="nav-logo">
+                <img src="Imagenes/LogoL.png" alt="Logo" class="nav-logo">
                 <span>Gimnasio</span>
             </div>
             <div class="nav-menu">
@@ -755,7 +761,7 @@
     <div id="administradoresScreen" class="screen">
         <nav class="navbar">
             <div class="nav-brand">
-                <img src="Imagenes/Logo2.png" alt="Logo" class="nav-logo">
+                <img src="Imagenes/LogoL.png" alt="Logo" class="nav-logo">
                 <span>Gimnasio</span>
             </div>
             <div class="nav-menu">
@@ -845,7 +851,12 @@
                         </div>
                         <div class="form-group">
                             <label for="adminPassword">Contraseña:</label>
-                            <input type="password" id="adminPassword" required>
+                            <div class="password-input-group">
+                                <input type="password" id="adminPassword" required>
+                                <button type="button" class="password-toggle" onclick="togglePassword('adminPassword')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                     <div class="form-group">
@@ -869,7 +880,7 @@
     <div id="reportesScreen" class="screen">
         <nav class="navbar">
             <div class="nav-brand">
-                <img src="Imagenes/Logo2.png" alt="Logo" class="nav-logo">
+                <img src="Imagenes/LogoL.png" alt="Logo" class="nav-logo">
                 <span>Gimnasio</span>
             </div>
             <div class="nav-menu">
@@ -959,7 +970,7 @@
     <div id="configuracionScreen" class="screen">
         <nav class="navbar">
             <div class="nav-brand">
-                <img src="Imagenes/Logo2.png" alt="Logo" class="nav-logo">
+                <img src="Imagenes/LogoL.png" alt="Logo" class="nav-logo">
                 <span>Gimnasio</span>
             </div>
             <div class="nav-menu">

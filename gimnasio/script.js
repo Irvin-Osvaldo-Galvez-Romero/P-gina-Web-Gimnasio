@@ -377,13 +377,58 @@ document.addEventListener('DOMContentLoaded', async function() {
 function showAlert(message, type = 'success') {
     const settings = JSON.parse(localStorage.getItem('userSettings') || '{}');
     if (settings.notificationsEnabled === false) return;
-    const alert = document.createElement('div');
-    alert.className = `alert alert-${type}`;
-    alert.textContent = message;
-    document.body.appendChild(alert);
+    
+    // Crear contenedor de notificaciones si no existe
+    let notificationContainer = document.querySelector('.notification-container');
+    if (!notificationContainer) {
+        notificationContainer = document.createElement('div');
+        notificationContainer.className = 'notification-container';
+        document.body.appendChild(notificationContainer);
+    }
+    
+    // Crear notificación
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    
+    // Determinar icono según el tipo
+    let icon = 'fa-info-circle';
+    switch(type) {
+        case 'success':
+            icon = 'fa-check-circle';
+            break;
+        case 'warning':
+            icon = 'fa-exclamation-triangle';
+            break;
+        case 'error':
+            icon = 'fa-times-circle';
+            break;
+        case 'info':
+            icon = 'fa-info-circle';
+            break;
+    }
+    
+    notification.innerHTML = `
+        <i class=\"fas ${icon} notification-icon\"></i>
+        <span class=\"notification-message\">${message}</span>
+        <button class=\"notification-close\" onclick=\"this.parentElement.remove()\">
+            <i class=\"fas fa-times\"></i>
+        </button>
+    `;
+    
+    // Agregar al contenedor
+    notificationContainer.appendChild(notification);
+    
+    // Remover automáticamente después de 2.5 segundos
     setTimeout(() => {
-        alert.remove();
-    }, 3000);
+        if (notification.parentNode) {
+            notification.classList.add('removing');
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 500);
+        }
+    }, 2500);
 }
 
 function saveToLocalStorage() {
@@ -2407,15 +2452,15 @@ function renderInstructoresGrid() {
             <div class="instructor-contacto">
                 <div class="contacto-item">
                     <i class="fas fa-phone"></i>
-                    <span>${instructor.telefono}</span>
+                    <span>${instructor.telefono || 'No disponible'}</span>
                 </div>
                 <div class="contacto-item">
                     <i class="fas fa-mobile-alt"></i>
-                    <span>${instructor.celular}</span>
+                    <span>${instructor.celular || 'No disponible'}</span>
                 </div>
                 <div class="contacto-item">
                     <i class="fas fa-envelope"></i>
-                    <span>${instructor.email}</span>
+                    <span>${instructor.email || 'No disponible'}</span>
                 </div>
             </div>
             <div class="instructor-descripcion">
@@ -2875,31 +2920,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Función para mostrar mensajes en el modal
 function showModalMessage(message, type = 'success') {
-    // Remover mensajes existentes
-    const existingMessage = document.querySelector('.modal-message');
-    if (existingMessage) {
-        existingMessage.remove();
-    }
-    
-    // Crear nuevo mensaje
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `modal-message ${type}`;
-    messageDiv.innerHTML = `
-        <div style="text-align: center;">
-            <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}" 
-               style="font-size: 2rem; color: ${type === 'success' ? '#28a745' : '#ff3a57'}; margin-bottom: 15px;"></i>
-            <p style="color: var(--text-color); font-size: 1.1rem; margin: 0;">${message}</p>
-        </div>
-    `;
-    
-    document.body.appendChild(messageDiv);
-    
-    // Remover mensaje después de 3 segundos
-    setTimeout(() => {
-        if (messageDiv.parentNode) {
-            messageDiv.remove();
-        }
-    }, 3000);
+    // Usar el mismo sistema de notificaciones que showAlert
+    showAlert(message, type);
 }
 
 // Función para cerrar modal de instructor mejorada
@@ -3041,4 +3063,21 @@ function closeClientModal() {
     document.getElementById('clienteAlergia').disabled = false;
     document.getElementById('clienteDireccion').disabled = false;
     document.getElementById('clienteMembresia').disabled = false;
+}
+
+// Función para mostrar/ocultar contraseñas
+function togglePassword(inputId) {
+    const input = document.getElementById(inputId);
+    const toggleButton = input.parentElement.querySelector('.password-toggle');
+    const icon = toggleButton.querySelector('i');
+    
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'fas fa-eye-slash';
+        toggleButton.classList.add('showing');
+    } else {
+        input.type = 'password';
+        icon.className = 'fas fa-eye';
+        toggleButton.classList.remove('showing');
+    }
 }

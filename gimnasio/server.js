@@ -239,9 +239,15 @@ app.get('/api/reportes/all', async (req, res) => {
         const ingresosMensuales = ventasMes.reduce((sum, venta) => sum + (parseFloat(venta.total) || 0), 0);
         const ventasMensualesCount = ventasMes.length;
 
-        const membresiasActivas = await clientesCollection.countDocuments({
-            fechaFin: { $gte: today }
-        });
+        // Cambiar el cálculo de membresías activas para que use la misma lógica que el historial
+        // (clientes con más de 7 días restantes)
+        const clientes = await clientesCollection.find({}).toArray();
+        
+        const membresiasActivas = clientes.filter(cliente => {
+            const fechaFin = new Date(cliente.fechaFin);
+            const diasRestantes = Math.ceil((fechaFin - today) / (1000 * 60 * 60 * 24));
+            return diasRestantes > 7; // Más de 7 días restantes = ACTIVA
+        }).length;
 
         const cardStats = {
             ventasMensuales: ventasMensualesCount,
@@ -959,9 +965,13 @@ app.get('/api/debug/membresias', async (req, res) => {
         const clientesCollection = db.collection('clientes');
         
         const today = new Date();
-        const membresiasActivas = await clientesCollection.find({
-            fechaFin: { $gte: today }
-        }).toArray();
+        const clientes = await clientesCollection.find({}).toArray();
+        
+        const membresiasActivas = clientes.filter(cliente => {
+            const fechaFin = new Date(cliente.fechaFin);
+            const diasRestantes = Math.ceil((fechaFin - today) / (1000 * 60 * 60 * 24));
+            return diasRestantes > 7; // Más de 7 días restantes = ACTIVA
+        }).length;
         
         const totalClientes = await clientesCollection.countDocuments();
         const membresiasExpiradas = await clientesCollection.countDocuments({
@@ -970,7 +980,7 @@ app.get('/api/debug/membresias', async (req, res) => {
         
         res.json({
             totalClientes,
-            membresiasActivas: membresiasActivas.length,
+            membresiasActivas,
             membresiasExpiradas,
             fechaActual: today,
             detalles: membresiasActivas.map(cliente => ({
