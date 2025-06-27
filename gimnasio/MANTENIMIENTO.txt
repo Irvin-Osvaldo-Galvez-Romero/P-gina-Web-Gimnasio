@@ -1,0 +1,54 @@
+MANTENIMIENTO - SISTEMA DE GESTIÓN DE GIMNASIO
+===============================================
+
+1. OBJETIVO DEL MANTENIMIENTO
+----------------------------
+Asegurar el funcionamiento óptimo, la seguridad y la disponibilidad del sistema de gestión de gimnasio mediante tareas periódicas y buenas prácticas.
+
+2. RESPALDO DE INFORMACIÓN
+--------------------------
+- Realiza respaldos periódicos de la base de datos (MongoDB/Firebase) y de los archivos importantes (imágenes, contratos, etc.).
+- Almacena los respaldos en ubicaciones seguras y fuera del servidor principal.
+- Verifica la integridad de los respaldos realizando restauraciones de prueba.
+
+3. LIMPIEZA Y DEPURACIÓN DE DATOS
+---------------------------------
+- Elimina registros de clientes, instructores y productos inactivos o duplicados.
+- Revisa y depura archivos obsoletos en las carpetas `Imagenes/` y `contratos/`.
+- Mantén actualizada la información de usuarios y administradores.
+
+4. ACTUALIZACIÓN DE DEPENDENCIAS Y LIBRERÍAS
+--------------------------------------------
+- Revisa periódicamente si hay nuevas versiones de las dependencias de Node.js y librerías externas.
+- Actualiza las dependencias usando:
+  ```sh
+  npm install
+  npm update
+  ```
+- Verifica el correcto funcionamiento del sistema después de cada actualización.
+
+5. MONITOREO Y RENDIMIENTO
+--------------------------
+- Supervisa el uso de recursos del servidor (CPU, memoria, almacenamiento).
+- Revisa los logs de errores y advertencias para detectar problemas tempranamente.
+- Optimiza imágenes y archivos para mejorar la velocidad de carga.
+
+6. SEGURIDAD
+------------
+- Cambia periódicamente las contraseñas de acceso de administradores y usuarios críticos.
+- Revisa y ajusta los permisos de acceso a archivos y carpetas sensibles.
+- Mantén actualizado el archivo `.env` y restringe su acceso solo a personal autorizado.
+- Elimina cuentas de usuarios que ya no formen parte del equipo.
+
+7. BUENAS PRÁCTICAS
+-------------------
+- Documenta cualquier cambio importante en la configuración o estructura del sistema.
+- Realiza pruebas de aceptación después de tareas de mantenimiento.
+- Capacita al personal en el uso correcto del sistema y en la importancia del mantenimiento.
+
+8. SOPORTE Y ESCALAMIENTO
+-------------------------
+- Ante problemas recurrentes o de difícil solución, contacta al área de soporte técnico.
+- Lleva un registro de las tareas de mantenimiento realizadas y de los incidentes detectados.
+
+¡El mantenimiento preventivo y correctivo es clave para la estabilidad y seguridad del sistema de gestión de gimnasio! 

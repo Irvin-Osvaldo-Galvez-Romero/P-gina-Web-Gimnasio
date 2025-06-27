@@ -1,0 +1,91 @@
+MANUAL TÉCNICO - SISTEMA DE GESTIÓN DE GIMNASIO
+================================================
+
+1. INTRODUCCIÓN
+----------------
+Este manual técnico está dirigido a desarrolladores y administradores del sistema de gestión de gimnasio. Incluye detalles sobre la arquitectura, instalación, configuración, estructura del proyecto y buenas prácticas para mantenimiento y desarrollo.
+
+2. ARQUITECTURA GENERAL
+------------------------
+- **Frontend:** HTML, CSS, JavaScript (Vanilla), Chart.js, FontAwesome.
+- **Backend:** Node.js (Express opcional, según scripts), integración con Firebase y/o MongoDB.
+- **Base de datos:** MongoDB (local o Atlas) y/o Firebase Firestore.
+- **Almacenamiento de archivos:** Firebase Storage y carpeta local `Imagenes/` y `contratos/`.
+
+3. ESTRUCTURA DE CARPETAS Y ARCHIVOS
+-------------------------------------
+- `index.html`         → Interfaz principal del sistema.
+- `styles.css`         → Estilos globales.
+- `script.js`          → Lógica de frontend y conexión con backend/Firebase.
+- `server.js`          → (Opcional) Servidor Node.js para API o pruebas locales.
+- `Imagenes/`          → Imágenes de productos, instructores, logos, etc.
+- `contratos/`         → Contratos PDF de instructores.
+- `*.js`               → Scripts de utilidad para pruebas, carga de datos, etc.
+- `package.json`       → Dependencias y scripts de Node.js.
+- `env.example`        → Ejemplo de variables de entorno.
+- `README.md`          → Documentación general.
+- `MANUAL-USUARIO.txt` → Manual de usuario final.
+- `MANUAL-TECNICO.txt` → (Este archivo) Manual técnico.
+
+4. DEPENDENCIAS PRINCIPALES
+---------------------------
+- Node.js >= 14.x
+- npm >= 6.x
+- Chart.js (CDN)
+- FontAwesome (CDN)
+- Firebase SDK (CDN)
+- MongoDB (local o Atlas)
+
+5. CONFIGURACIÓN INICIAL
+------------------------
+- Clona el repositorio:
+  ```sh
+  git clone <url-del-repo>
+  cd gimnasio
+  ```
+- Instala dependencias de Node.js:
+  ```sh
+  npm install
+  ```
+- Configura las variables de entorno:
+  - Copia `env.example` a `.env` y completa los valores necesarios (URI de MongoDB, claves de Firebase, etc).
+- Si usas MongoDB local, revisa el archivo `MONGODB-SETUP.md` para instrucciones de instalación y conexión.
+
+6. DESPLIEGUE Y EJECUCIÓN
+-------------------------
+- Para desarrollo local:
+  ```sh
+  node server.js
+  ```
+  o abre `index.html` directamente en el navegador si solo usas Firebase.
+- Para producción, puedes desplegar en Vercel, Netlify, o un servidor Node.js propio.
+- Si usas Firebase, asegúrate de que las reglas de Firestore y Storage estén configuradas correctamente.
+
+7. BASE DE DATOS
+----------------
+- **MongoDB:**
+  - Estructura de colecciones: clientes, instructores, productos, ventas, administradores, membresias.
+  - Usa los scripts `crear-bases-datos.js`, `agregar-clientes-ejemplo.js`, etc., para poblar datos de ejemplo.
+- **Firebase Firestore:**
+  - Configuración en el bloque `firebaseConfig` de `index.html`.
+  - Colecciones similares a las de MongoDB.
+
+8. SCRIPTS ÚTILES
+------------------
+- `crear-bases-datos.js`         → Crea y estructura la base de datos MongoDB.
+- `agregar-clientes-ejemplo.js`  → Agrega clientes de ejemplo.
+- `agregar-instructores-ejemplo.js` → Agrega instructores de ejemplo.
+- `test-membresias.js`, `test-instructores.js`, etc. → Scripts de prueba.
+- `fix-membresias.js`            → Corrige datos de membresías.
+
+9. BUENAS PRÁCTICAS Y RECOMENDACIONES
+--------------------------------------
+- Realiza commits frecuentes y descriptivos.
+- Usa ramas para nuevas funcionalidades o correcciones.
+- Mantén actualizado el archivo `.env` y nunca lo subas al repositorio.
+- Haz backup regular de la base de datos.
+- Documenta cualquier cambio importante en el código o la estructura.
+
+10. CONTACTO Y SOPORTE
+----------------------
+- Para dudas técnicas, revisa el archivo `README.md` o contacta al desarrollador principal del proyecto. 

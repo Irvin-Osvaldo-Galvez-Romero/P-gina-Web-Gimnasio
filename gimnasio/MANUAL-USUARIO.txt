@@ -1,0 +1,99 @@
+MANUAL DE USUARIO - SISTEMA DE GESTIÓN DE GIMNASIO
+====================================================
+
+1. INTRODUCCIÓN
+----------------
+Este sistema permite gestionar un gimnasio de manera integral: clientes, instructores, productos, ventas, reportes y configuración. El sistema es accesible vía navegador web.
+
+2. INICIO DE SESIÓN
+-------------------
+- Al abrir el sistema, verás la pantalla de inicio de sesión.
+- Ingresa tu nombre de usuario y contraseña.
+- Haz clic en "Iniciar Sesión".
+- Si los datos son correctos, accederás al panel principal (Dashboard).
+
+3. NAVEGACIÓN GENERAL
+---------------------
+- El menú de navegación está en la parte superior de cada pantalla.
+- Puedes acceder a las siguientes secciones:
+  - Dashboard
+  - Clientes
+  - Historial
+  - Instructores
+  - Ventas
+  - Productos
+  - Administradores
+  - Reportes
+  - Configuración
+  - Salir
+
+4. DASHBOARD
+------------
+- Muestra estadísticas generales: total de clientes, ventas del día, productos en stock.
+- Incluye gráficas de actividad y ventas.
+
+5. GESTIÓN DE CLIENTES
+----------------------
+- Accede a la sección "Clientes" desde el menú.
+- Puedes buscar clientes usando la barra de búsqueda.
+- Para agregar un nuevo cliente, haz clic en "Nuevo Cliente" y llena el formulario.
+- Para editar o eliminar un cliente, usa los botones de acción en la tabla.
+
+6. HISTORIAL
+------------
+- Consulta el historial de membresías y actividades de los clientes.
+- Puedes buscar en el historial y ver suscripciones vencidas o próximas a vencer.
+
+7. GESTIÓN DE INSTRUCTORES
+--------------------------
+- Accede a la sección "Instructores".
+- Puedes ver instructores en modo catálogo o tabla.
+- Filtra por especialidad (Gym, Zumba, CrossFit, Box, Danza).
+- Agrega, edita o elimina instructores usando los botones correspondientes.
+- Puedes subir foto y contrato del instructor.
+
+8. VENTAS
+---------
+- Accede a la sección "Ventas".
+- Selecciona productos para agregarlos al carrito.
+- Procesa la venta haciendo clic en "Procesar Venta".
+
+9. GESTIÓN DE PRODUCTOS
+-----------------------
+- Accede a la sección "Productos".
+- Agrega, edita o elimina productos.
+- Puedes subir una imagen para cada producto.
+
+10. ADMINISTRADORES
+-------------------
+- Accede a la sección "Administradores".
+- Agrega, edita o elimina administradores.
+- Define el rol: Administrador, Empleado o Supervisor.
+
+11. REPORTES
+------------
+- Consulta reportes de ventas mensuales, membresías activas e ingresos.
+- Visualiza gráficas de ventas y membresías.
+
+12. CONFIGURACIÓN
+-----------------
+- Personaliza la apariencia: tamaño de fuente, tema claro/oscuro, fuente, animaciones.
+- Cambia el idioma y activa/desactiva notificaciones.
+- Puedes restablecer los ajustes a valores predeterminados.
+
+13. CERRAR SESIÓN
+-----------------
+- Haz clic en "Salir" en el menú.
+- Confirma para cerrar la sesión de manera segura.
+
+14. RECOMENDACIONES DE USO
+--------------------------
+- Guarda los cambios antes de salir de cada sección.
+- Utiliza la barra de búsqueda para encontrar rápidamente información.
+- Sube imágenes y documentos en los formatos permitidos.
+
+15. CONTACTO Y SOPORTE
+----------------------
+- Para dudas o soporte, contacta al administrador del sistema o consulta la documentación técnica incluida en el proyecto.
+
+¡Gracias por usar el sistema de gestión de gimnasio! 

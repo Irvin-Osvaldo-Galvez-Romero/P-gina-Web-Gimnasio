@@ -1,0 +1,69 @@
+SOPORTE POST-ENTREGA - SISTEMA DE GESTIÓN DE GIMNASIO
+=====================================================
+
+1. OBJETIVO DEL SOPORTE POST-ENTREGA
+------------------------------------
+Brindar a los usuarios y administradores las pautas y recursos necesarios para resolver problemas, mantener y actualizar el sistema después de la entrega formal del proyecto.
+
+2. CANALES DE CONTACTO Y SOPORTE
+--------------------------------
+- Correo electrónico del soporte técnico: soporte@gimnasio.com (ejemplo)
+- Teléfono de atención: +52 123 456 7890 (ejemplo)
+- Horario de atención: Lunes a Viernes, 9:00 a 18:00 hrs
+- Documentación adicional: Revisar los archivos MANUAL-USUARIO.txt, MANUAL-TECNICO.txt y CAPACITACION.txt
+
+3. MANTENIMIENTO DEL SISTEMA
+----------------------------
+- Realizar respaldos periódicos de la base de datos y archivos importantes (imágenes, contratos, etc.).
+- Actualizar las dependencias de Node.js y librerías externas regularmente usando:
+  ```sh
+  npm update
+  ```
+- Revisar y limpiar registros de usuarios, clientes e instructores inactivos.
+- Mantener actualizado el archivo .env y restringir su acceso.
+
+4. SOLUCIÓN DE PROBLEMAS COMUNES
+--------------------------------
+- **No puedo iniciar sesión:**
+  - Verifica usuario y contraseña.
+  - Si olvidaste la contraseña, contacta al administrador.
+- **No se guardan los cambios:**
+  - Revisa la conexión a internet y permisos de usuario.
+  - Verifica que los campos obligatorios estén completos.
+- **Errores de visualización:**
+  - Limpia la caché del navegador o prueba en otro navegador.
+- **Problemas con la base de datos:**
+  - Asegúrate de que MongoDB/Firebase esté en línea y accesible.
+  - Revisa las credenciales y la configuración en el archivo .env.
+- **Archivos no se suben o descargan:**
+  - Verifica el formato y tamaño de los archivos.
+  - Revisa permisos de almacenamiento en Firebase o en el servidor.
+
+5. ACTUALIZACIÓN DEL SISTEMA
+----------------------------
+- Antes de actualizar, realiza un respaldo completo.
+- Para actualizar el sistema:
+  1. Descarga la nueva versión del repositorio.
+  2. Ejecuta `npm install` para instalar nuevas dependencias.
+  3. Revisa los archivos de configuración y documentación de cambios.
+  4. Realiza pruebas de aceptación antes de poner en producción.
+
+6. RECOMENDACIONES GENERALES
+----------------------------
+- No compartas credenciales de acceso.
+- Mantén el sistema y los navegadores actualizados.
+- Reporta cualquier error o vulnerabilidad detectada.
+- Capacita a nuevos usuarios con los materiales incluidos.
+
+7. REGISTRO DE INCIDENTES Y MEJORAS
+-----------------------------------
+- Lleva un registro de incidentes y solicitudes de mejora.
+- Prioriza la atención de errores críticos y actualizaciones de seguridad.
+- Comunica al equipo de soporte cualquier cambio importante en la infraestructura.
+
+8. FIN DEL SOPORTE
+------------------
+- El soporte post-entrega cubre un periodo acordado en el contrato (ejemplo: 3 meses).
+- Para soporte extendido, contacta al proveedor o desarrollador del sistema.
+
+¡Gracias por confiar en el sistema de gestión de gimnasio! Para cualquier duda, consulta este documento o contacta al área de soporte. 

@@ -1,0 +1,75 @@
+CAPACITACIÓN - SISTEMA DE GESTIÓN DE GIMNASIO
+==============================================
+
+1. OBJETIVO DE LA CAPACITACIÓN
+------------------------------
+Brindar a los usuarios los conocimientos y habilidades necesarios para utilizar de manera eficiente el sistema de gestión de gimnasio, cubriendo las funciones principales y mejores prácticas.
+
+2. INTRODUCCIÓN AL SISTEMA
+--------------------------
+- El sistema permite gestionar clientes, instructores, productos, ventas, reportes y configuración del gimnasio.
+- Acceso vía navegador web, interfaz amigable y moderna.
+
+3. ACCESO AL SISTEMA
+--------------------
+- Ingresa la URL o abre el archivo `index.html`.
+- Introduce tu usuario y contraseña en la pantalla de inicio de sesión.
+- Si tienes problemas para ingresar, contacta al administrador.
+
+4. NAVEGACIÓN Y MENÚ PRINCIPAL
+------------------------------
+- El menú superior permite acceder a todas las secciones: Dashboard, Clientes, Historial, Instructores, Ventas, Productos, Administradores, Reportes, Configuración y Salir.
+- Haz clic en cada sección para explorar sus funciones.
+
+5. GESTIÓN DE CLIENTES
+----------------------
+- Para agregar un cliente: Ve a "Clientes" > "Nuevo Cliente", llena el formulario y guarda.
+- Para editar/eliminar: Usa los botones de acción en la tabla de clientes.
+- Utiliza la barra de búsqueda para encontrar clientes rápidamente.
+
+6. GESTIÓN DE INSTRUCTORES
+--------------------------
+- Para agregar un instructor: Ve a "Instructores" > "Nuevo Instructor", completa el formulario y guarda.
+- Puedes filtrar instructores por especialidad y cambiar la vista (catálogo/tabla).
+- Sube foto y contrato si es necesario.
+
+7. GESTIÓN DE PRODUCTOS
+-----------------------
+- Para agregar un producto: Ve a "Productos" > "Nuevo Producto", llena el formulario y guarda.
+- Edita o elimina productos desde la tabla.
+- Sube imágenes para una mejor visualización.
+
+8. VENTAS Y CARRITO
+-------------------
+- Ve a "Ventas" para seleccionar productos y agregarlos al carrito.
+- Haz clic en "Procesar Venta" para finalizar la compra.
+- El sistema actualizará el stock automáticamente.
+
+9. REPORTES Y ESTADÍSTICAS
+--------------------------
+- Ve a "Reportes" para consultar ventas mensuales, membresías activas e ingresos.
+- Analiza las gráficas para tomar mejores decisiones.
+
+10. CONFIGURACIÓN PERSONALIZADA
+-------------------------------
+- Cambia el tema (claro/oscuro), tamaño de fuente, idioma y animaciones desde "Configuración".
+- Restablece los ajustes si es necesario.
+
+11. CIERRE DE SESIÓN
+--------------------
+- Haz clic en "Salir" y confirma para cerrar tu sesión de manera segura.
+
+12. BUENAS PRÁCTICAS Y RECOMENDACIONES
+--------------------------------------
+- Guarda los cambios antes de salir de cada sección.
+- No compartas tu contraseña.
+- Utiliza la barra de búsqueda para agilizar tu trabajo.
+- Sube archivos en los formatos permitidos (imágenes, PDF).
+- Si encuentras un error, repórtalo al administrador.
+
+13. SOPORTE Y DUDAS
+-------------------
+- Consulta el manual de usuario para detalles específicos.
+- Para problemas técnicos, contacta al área de soporte o al administrador del sistema.
+
+¡Gracias por participar en la capacitación y usar el sistema de gestión de gimnasio! 

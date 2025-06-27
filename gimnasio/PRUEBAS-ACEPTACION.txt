@@ -1,0 +1,100 @@
+PRUEBAS DE ACEPTACIÓN - SISTEMA DE GESTIÓN DE GIMNASIO
+======================================================
+
+1. INTRODUCCIÓN
+----------------
+Este documento describe las pruebas de aceptación para validar que el sistema de gestión de gimnasio cumple con los requisitos funcionales y de usuario. Cada prueba incluye el objetivo, los pasos a seguir y los criterios de aceptación.
+
+2. INICIO DE SESIÓN
+-------------------
+- **Objetivo:** Verificar que solo usuarios registrados pueden acceder al sistema.
+- **Pasos:**
+  1. Ingresar usuario y contraseña válidos.
+  2. Hacer clic en "Iniciar Sesión".
+- **Criterio de aceptación:** El usuario accede al dashboard. Si los datos son incorrectos, se muestra un mensaje de error.
+
+3. NAVEGACIÓN ENTRE MÓDULOS
+---------------------------
+- **Objetivo:** Comprobar que el menú permite acceder a todas las secciones.
+- **Pasos:**
+  1. Hacer clic en cada opción del menú (Dashboard, Clientes, Historial, etc.).
+- **Criterio de aceptación:** Se muestra la pantalla correspondiente y el menú resalta la sección activa.
+
+4. GESTIÓN DE CLIENTES
+----------------------
+- **Agregar cliente:**
+  - Pasos: Ir a "Clientes" > "Nuevo Cliente", llenar el formulario y guardar.
+  - Criterio: El cliente aparece en la tabla.
+- **Editar cliente:**
+  - Pasos: Seleccionar un cliente, editar datos y guardar.
+  - Criterio: Los cambios se reflejan en la tabla.
+- **Eliminar cliente:**
+  - Pasos: Seleccionar un cliente y eliminar.
+  - Criterio: El cliente desaparece de la tabla.
+
+5. GESTIÓN DE INSTRUCTORES
+--------------------------
+- **Agregar instructor:**
+  - Pasos: Ir a "Instructores" > "Nuevo Instructor", llenar el formulario y guardar.
+  - Criterio: El instructor aparece en la vista.
+- **Editar instructor:**
+  - Pasos: Seleccionar un instructor, editar datos y guardar.
+  - Criterio: Los cambios se reflejan.
+- **Eliminar instructor:**
+  - Pasos: Seleccionar un instructor y eliminar.
+  - Criterio: El instructor desaparece.
+
+6. GESTIÓN DE PRODUCTOS
+-----------------------
+- **Agregar producto:**
+  - Pasos: Ir a "Productos" > "Nuevo Producto", llenar el formulario y guardar.
+  - Criterio: El producto aparece en la tabla.
+- **Editar producto:**
+  - Pasos: Seleccionar un producto, editar y guardar.
+  - Criterio: Los cambios se reflejan.
+- **Eliminar producto:**
+  - Pasos: Seleccionar un producto y eliminar.
+  - Criterio: El producto desaparece.
+
+7. VENTAS Y CARRITO
+-------------------
+- **Agregar productos al carrito:**
+  - Pasos: Ir a "Ventas", seleccionar productos.
+  - Criterio: Los productos aparecen en el carrito.
+- **Procesar venta:**
+  - Pasos: Hacer clic en "Procesar Venta".
+  - Criterio: El carrito se vacía y se muestra confirmación.
+
+8. REPORTES
+-----------
+- **Visualizar reportes:**
+  - Pasos: Ir a "Reportes".
+  - Criterio: Se muestran gráficas y datos actualizados.
+
+9. CONFIGURACIÓN
+----------------
+- **Cambiar tema, fuente, idioma:**
+  - Pasos: Ir a "Configuración", modificar opciones.
+  - Criterio: Los cambios se aplican inmediatamente.
+- **Restablecer ajustes:**
+  - Pasos: Hacer clic en "Restablecer".
+  - Criterio: El sistema vuelve a los valores predeterminados.
+
+10. CERRAR SESIÓN
+-----------------
+- **Cerrar sesión:**
+  - Pasos: Ir a "Salir", confirmar.
+  - Criterio: El usuario vuelve a la pantalla de login.
+
+11. CRITERIOS GENERALES DE ACEPTACIÓN
+-------------------------------------
+- Todas las acciones muestran mensajes de éxito o error claros.
+- No se permite guardar formularios incompletos.
+- El sistema responde en menos de 2 segundos por acción.
+- Los datos se guardan y muestran correctamente tras recargar la página.
+
+12. OBSERVACIONES Y RECOMENDACIONES
+-----------------------------------
+- Realizar pruebas en diferentes navegadores y dispositivos.
+- Probar con datos válidos e inválidos.
+- Documentar cualquier error encontrado para su corrección. 

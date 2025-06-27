@@ -971,20 +971,28 @@ function checkMembresias() {
 
 // Búsqueda de clientes
 document.getElementById('searchCliente').addEventListener('input', function(e) {
-    const searchTerm = e.target.value.toLowerCase();
+    const searchTerm = e.target.value.trim().toLowerCase();
     const tbody = document.getElementById('clientesTableBody');
     tbody.innerHTML = '';
-    
-    const filteredClientes = clientes.filter(cliente => 
-        cliente.nombre.toLowerCase().includes(searchTerm) ||
-        cliente.apellidos.toLowerCase().includes(searchTerm) ||
-        (cliente.id || '').toLowerCase().includes(searchTerm)
-    );
-    
+
+    const filteredClientes = clientes.filter(cliente => {
+        const id = (cliente.id || '').toString().toLowerCase();
+        const _id = (cliente._id || '').toString().toLowerCase();
+        const nombre = (cliente.nombre || '').toLowerCase();
+        const apellidos = (cliente.apellidos || '').toLowerCase();
+        return (
+            id.includes(searchTerm) ||
+            _id.includes(searchTerm) ||
+            nombre.includes(searchTerm) ||
+            apellidos.includes(searchTerm)
+        );
+    });
+
     filteredClientes.forEach(cliente => {
         const row = document.createElement('tr');
+        const clienteId = cliente.id || cliente._id || 'N/A';
         row.innerHTML = `
-            <td>${cliente.id || 'N/A'}</td>
+            <td>${clienteId}</td>
             <td>${cliente.nombre}</td>
             <td>${cliente.apellidos}</td>
             <td>${cliente.edad}</td>
@@ -994,10 +1002,10 @@ document.getElementById('searchCliente').addEventListener('input', function(e) {
             <td>${cliente.direccion}</td>
             <td>
                 <div class="action-buttons">
-                    <button class="btn-edit" onclick="editCliente('${cliente.id}')" title="Editar">
+                    <button class="btn-edit" onclick="editCliente('${clienteId}')" title="Editar">
                         <i class="fas fa-edit"></i>
                     </button>
-                    <button class="btn-delete" onclick="deleteCliente('${cliente.id}')" title="Eliminar">
+                    <button class="btn-delete" onclick="deleteCliente('${clienteId}')" title="Eliminar">
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
