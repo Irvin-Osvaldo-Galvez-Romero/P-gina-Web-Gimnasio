@@ -3089,3 +3089,104 @@ function togglePassword(inputId) {
         toggleButton.classList.remove('showing');
     }
 }
+
+// Búsqueda en historial de clientes (usando la misma lógica que renderHistorialTable)
+document.getElementById('searchHistorial').addEventListener('input', function(e) {
+    const searchTerm = e.target.value.trim().toLowerCase();
+    const tbody = document.getElementById('historialTableBody');
+    tbody.innerHTML = '';
+
+    // Generar el historial completo igual que en renderHistorialTable
+    const historialCompleto = clientes.map(cliente => {
+        const fechaInicio = new Date(cliente.fechaInicio || new Date());
+        const fechaFin = new Date(cliente.fechaFin);
+        const diasRestantes = Math.ceil((fechaFin - new Date()) / (1000 * 60 * 60 * 24));
+        return {
+            ...cliente,
+            fechaInicio: fechaInicio,
+            fechaFin: fechaFin,
+            diasRestantes: diasRestantes
+        };
+    })
+    .filter(cliente => cliente.diasRestantes > 7)
+    .sort((a, b) => b.fechaInicio - a.fechaInicio);
+
+    // Filtrar por id, _id, nombre o apellidos
+    const filteredHistorial = historialCompleto.filter(cliente => {
+        const id = (cliente.id || '').toString().toLowerCase();
+        const _id = (cliente._id || '').toString().toLowerCase();
+        const nombre = (cliente.nombre || '').toLowerCase();
+        const apellidos = (cliente.apellidos || '').toLowerCase();
+        return (
+            id.includes(searchTerm) ||
+            _id.includes(searchTerm) ||
+            nombre.includes(searchTerm) ||
+            apellidos.includes(searchTerm)
+        );
+    });
+
+    if (filteredHistorial.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; color: var(--text-color);">No hay resultados para la búsqueda</td></tr>';
+        return;
+    }
+
+    filteredHistorial.forEach(cliente => {
+        const row = document.createElement('tr');
+        const estado = getEstadoSuscripcion(cliente.diasRestantes);
+        row.innerHTML = `
+            <td>${cliente.id}</td>
+            <td>${cliente.nombre}</td>
+            <td>${cliente.apellidos}</td>
+            <td>${cliente.edad}</td>
+            <td>${cliente.tipoMembresia}</td>
+            <td>${formatearFecha(cliente.fechaInicio)}</td>
+            <td>${formatearFecha(cliente.fechaFin)}</td>
+            <td><span class="${estado}">${getEstadoTexto(cliente.diasRestantes)}</span></td>
+            <td>${formatearFecha(cliente.fechaInicio)}</td>
+            <td>
+                <button class="btn-edit" onclick="editarTipoMembresia('${cliente.id}')" title="Editar tipo de membresía">
+                    <i class="fas fa-edit"></i>
+                </button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+});
+
+// Buscador de productos en ventas por nombre o categoría
+document.getElementById('searchVentaProducto').addEventListener('input', function(e) {
+    const searchTerm = e.target.value.trim().toLowerCase();
+    const productosGrid = document.getElementById('productosGrid');
+    productosGrid.innerHTML = '';
+
+    const filteredProductos = productos.filter(producto => {
+        const nombre = (producto.nombre || '').toLowerCase();
+        const categoria = (producto.categoria || '').toLowerCase();
+        return nombre.includes(searchTerm) || categoria.includes(searchTerm);
+    });
+
+    if (filteredProductos.length === 0) {
+        productosGrid.innerHTML = '<div style="color: var(--text-color); text-align: center; width: 100%;">No se encontraron productos</div>';
+        return;
+    }
+
+    filteredProductos.forEach(producto => {
+        const stock = producto.stock || producto.piezas || 0;
+        if (stock > 0) {
+            const card = document.createElement('div');
+            card.className = 'producto-card';
+            card.innerHTML = `
+                <img src="${producto.imagen || 'Imagenes/Logo2.png'}" alt="${producto.nombre}" class="producto-img">
+                <div class="producto-nombre">${producto.nombre}</div>
+                <div class="producto-precio">$${(producto.precio || 0).toFixed(2)}</div>
+                <div class="producto-stock">Stock: ${stock}</div>
+                <button class="btn-primary agregar-btn">Agregar</button>
+            `;
+            card.querySelector('.agregar-btn').addEventListener('click', function(ev) {
+                ev.stopPropagation();
+                agregarAlCarrito(producto);
+            });
+            productosGrid.appendChild(card);
+        }
+    });
+});
