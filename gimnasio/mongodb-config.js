@@ -14,7 +14,7 @@ const config = {
         }
     },
     atlas: {
-        uri: process.env.MONGODB_ATLAS_URI,
+        uri: process.env.MONGODB_ATLAS_URI || 'mongodb+srv://Usuario:X5ZhVvf1eRkUMQeE@cluster0.hnpybvy.mongodb.net/gimnasio_db?retryWrites=true&w=majority',
         options: {
             useNewUrlParser: true,
             useUnifiedTopology: true,

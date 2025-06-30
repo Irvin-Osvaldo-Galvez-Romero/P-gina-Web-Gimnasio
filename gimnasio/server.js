@@ -5,12 +5,13 @@ const {
     connectToMongoDB,
     getCollection,
     closeConnection,
-    getDb,
+    getDatabase,
     crearProducto,
-    actualizarProductoPorId
+    obtenerProductos
 } = require('./mongodb-config');
 const { ObjectId } = require('mongodb');
 const multer = require('multer');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -25,18 +26,38 @@ app.use(express.static('.'));
 
 // Servir archivos estáticos desde la carpeta 'public' y 'Imagenes'
 app.use(express.static(path.join(__dirname, 'public')));
-app.use('/Imagenes', express.static(path.join(__dirname, 'Imagenes')));
 
-// Configuración de Multer para almacenamiento de imágenes y PDFs
-const storage = multer.memoryStorage();
+// Crear carpetas si no existen
+const imagenesDir = path.join(__dirname, 'Imagenes');
+const contratosDir = path.join(__dirname, 'contratos');
+if (!fs.existsSync(imagenesDir)) fs.mkdirSync(imagenesDir, { recursive: true });
+if (!fs.existsSync(contratosDir)) fs.mkdirSync(contratosDir, { recursive: true });
 
-const upload = multer({ 
+// Configuración de Multer para almacenamiento en disco
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        if (file.mimetype === 'application/pdf') {
+            cb(null, contratosDir);
+        } else if (file.mimetype.startsWith('image/')) {
+            cb(null, imagenesDir);
+        } else {
+            cb(new Error('Tipo de archivo no permitido'), null);
+        }
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        const ext = path.extname(file.originalname);
+        const base = path.basename(file.originalname, ext);
+        cb(null, base + '-' + uniqueSuffix + ext);
+    }
+});
+
+const upload = multer({
     storage: storage,
     limits: {
         fileSize: 10 * 1024 * 1024 // 10MB límite
     },
     fileFilter: function (req, file, cb) {
-        // Permitir imágenes y PDFs
         if (file.mimetype.startsWith('image/') || file.mimetype === 'application/pdf') {
             cb(null, true);
         } else {
@@ -360,42 +381,75 @@ app.put('/api/clientes/:id', async (req, res) => {
         const clientesCollection = db.collection('clientes');
         
         const { id } = req.params;
-        const updateData = {
-            nombre: req.body.nombre,
-            apellidos: req.body.apellidos,
-            edad: req.body.edad,
-            enfermedadCronica: req.body.enfermedadCronica,
-            alergia: req.body.alergia,
-            tipoMembresia: req.body.tipoMembresia,
-            direccion: req.body.direccion,
-            fechaInicio: req.body.fechaInicio,
-            fechaFin: req.body.fechaFin,
-            updatedAt: new Date()
-        };
+        
+        // Crear objeto de actualización solo con los campos que se envían
+        const updateData = {};
+        
+        // Solo agregar campos que no sean null, undefined o vacíos
+        if (req.body.nombre !== null && req.body.nombre !== undefined && req.body.nombre !== '') {
+            updateData.nombre = req.body.nombre;
+        }
+        if (req.body.apellidos !== null && req.body.apellidos !== undefined && req.body.apellidos !== '') {
+            updateData.apellidos = req.body.apellidos;
+        }
+        if (req.body.edad !== null && req.body.edad !== undefined && req.body.edad !== '') {
+            updateData.edad = req.body.edad;
+        }
+        if (req.body.enfermedadCronica !== null && req.body.enfermedadCronica !== undefined && req.body.enfermedadCronica !== '') {
+            updateData.enfermedadCronica = req.body.enfermedadCronica;
+        }
+        if (req.body.alergia !== null && req.body.alergia !== undefined && req.body.alergia !== '') {
+            updateData.alergia = req.body.alergia;
+        }
+        if (req.body.tipoMembresia !== null && req.body.tipoMembresia !== undefined && req.body.tipoMembresia !== '') {
+            updateData.tipoMembresia = req.body.tipoMembresia;
+        }
+        if (req.body.direccion !== null && req.body.direccion !== undefined && req.body.direccion !== '') {
+            updateData.direccion = req.body.direccion;
+        }
+        if (req.body.fechaInicio !== null && req.body.fechaInicio !== undefined && req.body.fechaInicio !== '') {
+            updateData.fechaInicio = req.body.fechaInicio;
+        }
+        if (req.body.fechaFin !== null && req.body.fechaFin !== undefined && req.body.fechaFin !== '') {
+            updateData.fechaFin = req.body.fechaFin;
+        }
+        
+        // Siempre actualizar la fecha de modificación
+        updateData.updatedAt = new Date();
+        
+        console.log('📝 Datos a actualizar:', updateData);
         
         // Buscar por id personalizado o _id de MongoDB
         let result;
-        try {
-            const { ObjectId } = require('mongodb');
-            result = await clientesCollection.updateOne(
-                { _id: new ObjectId(id) },
-                { $set: updateData }
-            );
-        } catch (error) {
-            // Si falla la conversión, buscar por id personalizado
-            result = await clientesCollection.updateOne(
-                { id: id },
-                { $set: updateData }
-            );
+        
+        // Primero intentar buscar por id personalizado (como "001")
+        result = await clientesCollection.updateOne(
+            { id: id },
+            { $set: updateData }
+        );
+        
+        if (result.modifiedCount === 0) {
+            // Si no se encontró por id personalizado, intentar por ObjectId
+            try {
+                const { ObjectId } = require('mongodb');
+                result = await clientesCollection.updateOne(
+                    { _id: new ObjectId(id) },
+                    { $set: updateData }
+                );
+            } catch (error) {
+                console.log('⚠️ No es un ObjectId válido:', id);
+            }
         }
         
         if (result.modifiedCount > 0) {
+            console.log('✅ Cliente actualizado correctamente');
             res.json({ message: 'Cliente actualizado correctamente' });
         } else {
+            console.log('⚠️ Cliente no encontrado o no se modificó');
             res.status(404).json({ error: 'Cliente no encontrado' });
         }
     } catch (error) {
-        console.error('Error actualizando cliente:', error);
+        console.error('❌ Error actualizando cliente:', error);
         res.status(500).json({ error: 'Error interno del servidor' });
     }
 });
@@ -409,23 +463,33 @@ app.delete('/api/clientes/:id', async (req, res) => {
         
         const { id } = req.params;
         
+        console.log('🗑️ Intentando eliminar cliente con ID:', id);
+        
         // Buscar por id personalizado o _id de MongoDB
         let result;
-        try {
-            const { ObjectId } = require('mongodb');
-            result = await clientesCollection.deleteOne({ _id: new ObjectId(id) });
-        } catch (error) {
-            // Si falla la conversión, buscar por id personalizado
-            result = await clientesCollection.deleteOne({ id: id });
+        
+        // Primero intentar buscar por id personalizado (como "001")
+        result = await clientesCollection.deleteOne({ id: id });
+        
+        if (result.deletedCount === 0) {
+            // Si no se encontró por id personalizado, intentar por ObjectId
+            try {
+                const { ObjectId } = require('mongodb');
+                result = await clientesCollection.deleteOne({ _id: new ObjectId(id) });
+            } catch (error) {
+                console.log('⚠️ No es un ObjectId válido:', id);
+            }
         }
         
         if (result.deletedCount > 0) {
+            console.log('✅ Cliente eliminado correctamente');
             res.json({ message: 'Cliente eliminado correctamente' });
         } else {
+            console.log('⚠️ Cliente no encontrado para eliminar');
             res.status(404).json({ error: 'Cliente no encontrado' });
         }
     } catch (error) {
-        console.error('Error eliminando cliente:', error);
+        console.error('❌ Error eliminando cliente:', error);
         res.status(500).json({ error: 'Error interno del servidor' });
     }
 });
@@ -481,7 +545,7 @@ app.put('/api/productos/:id', upload.single('imagen'), async (req, res) => {
             datosActualizados.imagen = `Imagenes/${req.file.filename}`;
         }
 
-        const productoActualizado = await actualizarProductoPorId(id, datosActualizados);
+        const productoActualizado = await obtenerProductos(id, datosActualizados);
 
         if (!productoActualizado) {
             return res.status(404).json({ error: 'Producto no encontrado' });
@@ -1070,16 +1134,20 @@ app.post('/api/instructores', upload.fields([
         if (req.files) {
             if (req.files.foto) {
                 const fotoFile = req.files.foto[0];
+                // Guardar ruta y buffer en la base de datos
                 instructorData.foto = {
-                    data: fotoFile.buffer,
+                    path: 'Imagenes/' + path.basename(fotoFile.path),
+                    data: fs.readFileSync(fotoFile.path),
                     contentType: fotoFile.mimetype,
                     filename: fotoFile.originalname
                 };
             }
             if (req.files.contrato) {
                 const contratoFile = req.files.contrato[0];
+                // Guardar ruta y buffer en la base de datos
                 instructorData.contrato = {
-                    data: contratoFile.buffer,
+                    path: 'contratos/' + path.basename(contratoFile.path),
+                    data: fs.readFileSync(contratoFile.path),
                     contentType: contratoFile.mimetype,
                     filename: contratoFile.originalname
                 };
@@ -1088,11 +1156,10 @@ app.post('/api/instructores', upload.fields([
         
         const result = await instructoresCollection.insertOne(instructorData);
         instructorData._id = result.insertedId;
-        
         res.status(201).json(instructorData);
     } catch (error) {
-        console.error('Error creando instructor:', error);
-        res.status(500).json({ error: 'Error interno del servidor' });
+        console.error('Error al crear instructor:', error);
+        res.status(500).json({ error: 'Error interno del servidor al crear instructor' });
     }
 });
 
@@ -1128,7 +1195,8 @@ app.put('/api/instructores/:id', upload.fields([
             if (req.files.foto) {
                 const fotoFile = req.files.foto[0];
                 updateData.foto = {
-                    data: fotoFile.buffer,
+                    path: 'Imagenes/' + path.basename(fotoFile.path),
+                    data: fs.readFileSync(fotoFile.path),
                     contentType: fotoFile.mimetype,
                     filename: fotoFile.originalname
                 };
@@ -1136,7 +1204,8 @@ app.put('/api/instructores/:id', upload.fields([
             if (req.files.contrato) {
                 const contratoFile = req.files.contrato[0];
                 updateData.contrato = {
-                    data: contratoFile.buffer,
+                    path: 'contratos/' + path.basename(contratoFile.path),
+                    data: fs.readFileSync(contratoFile.path),
                     contentType: contratoFile.mimetype,
                     filename: contratoFile.originalname
                 };
@@ -1147,15 +1216,10 @@ app.put('/api/instructores/:id', upload.fields([
             { _id: new ObjectId(id) },
             { $set: updateData }
         );
-        
-        if (result.modifiedCount > 0) {
-            res.json({ message: 'Instructor actualizado correctamente' });
-        } else {
-            res.status(404).json({ error: 'Instructor no encontrado' });
-        }
+        res.json({ message: 'Instructor actualizado', result });
     } catch (error) {
-        console.error('Error actualizando instructor:', error);
-        res.status(500).json({ error: 'Error interno del servidor' });
+        console.error('Error al actualizar instructor:', error);
+        res.status(500).json({ error: 'Error interno del servidor al actualizar instructor' });
     }
 });
 
@@ -1224,5 +1288,9 @@ app.get('/api/instructores/:id/contrato', async (req, res) => {
         res.status(500).json({ error: 'Error interno del servidor' });
     }
 });
+
+// Servir archivos estáticos para imágenes y contratos
+app.use('/Imagenes', express.static(imagenesDir));
+app.use('/contratos', express.static(contratosDir));
 
 module.exports = app; 

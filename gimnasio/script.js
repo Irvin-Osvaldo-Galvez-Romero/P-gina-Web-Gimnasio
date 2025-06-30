@@ -703,7 +703,8 @@ async function loadDashboardChart() {
                     ticks: {
                         color: textColor,
                         font: {
-                            size: 14
+                            size: 14,
+                            weight: 'bold'
                         }
                     },
                     grid: {
@@ -2317,8 +2318,10 @@ function renderHistorialTable() {
     historialCompleto.forEach(cliente => {
         const row = document.createElement('tr');
         const estado = getEstadoSuscripcion(cliente.diasRestantes);
+        // Usar el ID correcto (id o _id)
+        const clienteId = cliente.id || cliente._id || 'N/A';
         row.innerHTML = `
-            <td>${cliente.id}</td>
+            <td>${clienteId}</td>
             <td>${cliente.nombre}</td>
             <td>${cliente.apellidos}</td>
             <td>${cliente.edad}</td>
@@ -2328,7 +2331,7 @@ function renderHistorialTable() {
             <td><span class="${estado}">${getEstadoTexto(cliente.diasRestantes)}</span></td>
             <td>${formatearFecha(cliente.fechaInicio)}</td>
             <td>
-                <button class="btn-edit" onclick="editarTipoMembresia('${cliente.id}')" title="Editar tipo de membresía">
+                <button class="btn-edit" onclick="editarTipoMembresia('${clienteId}')" title="Editar tipo de membresía">
                     <i class="fas fa-edit"></i>
                 </button>
             </td>
@@ -3016,19 +3019,62 @@ function actualizarContadoresFiltros() {
         
         // Actualizar el texto del botón con el contador
         const icon = button.querySelector('i');
-        const originalText = button.textContent.replace(/\d+$/, '').trim();
+        
+        // Eliminar el contador anterior para evitar duplicados
+        const countSpan = button.querySelector('.filter-count');
+        if (countSpan) {
+            countSpan.remove();
+        }
+        
+        // Obtener el texto base limpio
+        const originalText = button.textContent.trim();
+        
+        // Reconstruir el contenido del botón
         button.innerHTML = `${icon.outerHTML} ${originalText} <span class="filter-count">(${count})</span>`;
     });
 }
 
 // Nueva función para editar solo el tipo de membresía desde la tabla de suscripciones
 function editarTipoMembresia(clienteId) {
+    console.log('🔍 Buscando cliente con ID:', clienteId);
+    console.log('📋 Clientes disponibles:', clientes.map(c => ({ id: c.id, _id: c._id, nombre: c.nombre })));
+    
     const cliente = clientes.find(c => (c.id === clienteId || c._id === clienteId));
-    if (!cliente) return;
-    document.getElementById('membresiaModalTitle').textContent = 'Editar Tipo de Membresía';
-    document.getElementById('membresiaTipo').value = cliente.tipoMembresia || '';
-    document.getElementById('membresiaModal').setAttribute('data-cliente-id', clienteId);
-    document.getElementById('membresiaModal').style.display = 'block';
+    
+    if (!cliente) {
+        console.error('❌ Cliente no encontrado con ID:', clienteId);
+        showAlert('Cliente no encontrado', 'error');
+        return;
+    }
+    
+    console.log('✅ Cliente encontrado:', cliente);
+    
+    // Verificar que el modal existe
+    const modal = document.getElementById('membresiaModal');
+    if (!modal) {
+        console.error('❌ Modal de membresía no encontrado');
+        showAlert('Error: Modal no encontrado', 'error');
+        return;
+    }
+    
+    // Verificar que los elementos del formulario existen
+    const title = document.getElementById('membresiaModalTitle');
+    const tipoSelect = document.getElementById('membresiaTipo');
+    
+    if (!title || !tipoSelect) {
+        console.error('❌ Elementos del formulario no encontrados');
+        showAlert('Error: Formulario incompleto', 'error');
+        return;
+    }
+    
+    // Configurar el modal
+    title.textContent = 'Editar Tipo de Membresía';
+    tipoSelect.value = cliente.tipoMembresia || '';
+    modal.setAttribute('data-cliente-id', clienteId);
+    
+    // Mostrar el modal
+    modal.style.display = 'block';
+    console.log('✅ Modal de membresía abierto para cliente:', cliente.nombre);
 }
 
 function closeMembresiaModal() {
